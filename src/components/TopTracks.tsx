@@ -25,9 +25,18 @@ function TopTracks({ token, userId }: { token: string, userId: string }) {
   const { data: tracks, error, refetch } = useQuery<Track[]>({
     queryKey: ['tracks', userId],
     queryFn: async () => {
-      const result = await getUserTracks(userId)
-      console.log('Fetched tracks:', result)
-      return result
+      try {
+        const result = await getUserTracks(userId)
+        console.log('Raw tracks result:', result)
+        if (!result || !Array.isArray(result)) {
+          console.warn('Unexpected tracks result format:', result)
+          return []
+        }
+        return result
+      } catch (err) {
+        console.error('Error fetching tracks:', err)
+        return []
+      }
     },
     enabled: !!userId,
     retry: false, // We'll handle retries manually
@@ -74,7 +83,14 @@ function TopTracks({ token, userId }: { token: string, userId: string }) {
     return <div>Loading your top tracks...</div>
   }
 
-  if (!tracks || !Array.isArray(tracks) || tracks.length === 0) {
+  // Ensure tracks is an array and has valid items
+  const validTracks = Array.isArray(tracks) ? tracks.filter(track => 
+    track && 
+    typeof track === 'object' && 
+    'id' in track
+  ) : []
+
+  if (validTracks.length === 0) {
     return <div>No tracks found. Try adding some songs!</div>
   }
 
@@ -82,29 +98,32 @@ function TopTracks({ token, userId }: { token: string, userId: string }) {
     <div className="tracks-container">
       <h2>Your Top Tracks</h2>
       <div className="tracks-grid">
-        {tracks.map((track: Track) => {
-          if (!track) return null // Skip if track is null
-          
-          return (
-            <div key={track.id || 'unknown'} className="track-card">
-              {track.image_url && (
+        {validTracks.map((track) => (
+          <div key={track.id || 'unknown'} className="track-card">
+            <div className="track-image">
+              {track.image_url ? (
                 <img 
                   src={track.image_url} 
                   alt={`${track.name || 'Unknown track'} album art`}
                   onError={(e) => {
-                    e.currentTarget.src = '/default-album-art.png' // Fallback image
+                    console.log('Image load error, using fallback')
+                    e.currentTarget.src = '/default-album-art.png'
                   }}
                 />
+              ) : (
+                <div className="placeholder-image">
+                  No Image Available
+                </div>
               )}
-              <div className="track-info">
-                <h3>{track.name || 'Unknown Track'}</h3>
-                <p>{track.artist || 'Unknown Artist'}</p>
-                <p className="album-name">{track.album || 'Unknown Album'}</p>
-                <span className="rank">#{track.rank || '?'}</span>
-              </div>
             </div>
-          )
-        })}
+            <div className="track-info">
+              <h3>{track.name || 'Unknown Track'}</h3>
+              <p>{track.artist || 'Unknown Artist'}</p>
+              <p className="album-name">{track.album || 'Unknown Album'}</p>
+              <span className="rank">#{track.rank || '?'}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
