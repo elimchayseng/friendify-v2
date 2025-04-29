@@ -1,16 +1,20 @@
+.tracks-container {
+  padding: 20px;
+}
+
 .tracks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  padding: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
 }
 
 .track-card {
-  background: #282828;
+  background: #fff;
   border-radius: 8px;
-  padding: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease;
-  cursor: pointer;
 }
 
 .track-card:hover {
@@ -20,29 +24,54 @@
 .track-image {
   width: 100%;
   aspect-ratio: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.track-image img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 4px;
-  margin-bottom: 1rem;
+}
+
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 14px;
 }
 
 .track-info {
-  text-align: left;
+  padding: 15px;
 }
 
 .track-info h3 {
-  margin: 0;
-  font-size: 1rem;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .track-info p {
-  margin: 0.5rem 0 0;
-  font-size: 0.9rem;
-  color: #b3b3b3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.album-name {
+  font-style: italic;
+  margin-top: 4px !important;
+}
+
+.rank {
+  display: inline-block;
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-top: 8px;
+  color: #444;
 } 

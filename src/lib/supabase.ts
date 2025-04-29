@@ -264,6 +264,8 @@ interface UserTrackResponse {
 
 export async function getUserTracks(userId: string): Promise<Track[]> {
   try {
+    console.log('Fetching tracks for userId:', userId);
+    
     const { data, error } = await supabase
       .from('user_tracks')
       .select(`
@@ -285,24 +287,45 @@ export async function getUserTracks(userId: string): Promise<Track[]> {
       throw error
     }
 
-    if (!data) {
+    if (!data || !Array.isArray(data)) {
+      console.warn('No data or invalid data format received:', data)
       return []
     }
 
+    console.log('Raw data from Supabase:', data);
+
     // Transform and validate the data
     const tracks: Track[] = data
-      .filter((item: any) => item.tracks && typeof item.tracks === 'object')
-      .map((item: any) => ({
-        id: item.tracks.id || '',
-        name: item.tracks.name || '',
-        artist: item.tracks.artist || '',
-        album: item.tracks.album || '',
-        image_url: item.tracks.image_url || '',
-        spotify_id: item.tracks.spotify_id || '',
-        rank: item.rank || 0
-      }))
+      .filter((item: any) => {
+        // Validate the item structure
+        const isValid = item &&
+          typeof item === 'object' &&
+          item.tracks &&
+          typeof item.tracks === 'object' &&
+          typeof item.tracks.id === 'string' &&
+          typeof item.rank === 'number'
+        
+        if (!isValid) {
+          console.warn('Invalid track item:', item)
+        }
+        return isValid
+      })
+      .map((item: any) => {
+        // Create a valid track object with fallbacks
+        const track = {
+          id: item.tracks.id,
+          name: String(item.tracks.name || ''),
+          artist: String(item.tracks.artist || ''),
+          album: String(item.tracks.album || ''),
+          image_url: String(item.tracks.image_url || ''),
+          spotify_id: String(item.tracks.spotify_id || ''),
+          rank: Number(item.rank) || 0
+        }
+        console.log('Processed track:', track)
+        return track
+      })
 
-    console.log('Processed tracks:', tracks)
+    console.log('Final processed tracks:', tracks)
     return tracks
   } catch (error) {
     console.error('Error in getUserTracks:', error)
