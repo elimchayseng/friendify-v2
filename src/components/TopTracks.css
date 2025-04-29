@@ -1,0 +1,48 @@
+.tracks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.track-card {
+  background: #282828;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.track-card:hover {
+  transform: translateY(-5px);
+}
+
+.track-image {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.track-info {
+  text-align: left;
+}
+
+.track-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-info p {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+} 
