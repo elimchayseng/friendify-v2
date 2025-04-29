@@ -21,57 +21,79 @@ interface UserTracks {
   tracks: Track[]
 }
 
-function TopTracks({ token, userId }: { token: string, userId: string }) {
-  const queryClient = useQueryClient()
+function TopTracks({ token, userId }: { token: string | null, userId: string | null }) {
   const [isLoading, setIsLoading] = useState(true)
-  const [retryCount, setRetryCount] = useState(0)
-  const MAX_RETRIES = 3
-  const RETRY_DELAY = 1000
 
-  const { data: allUserTracks, error } = useQuery<UserTracks[]>({
+  const { data: allUserTracks, error, isLoading: queryLoading } = useQuery<UserTracks[]>({
     queryKey: ['all-user-tracks'],
     queryFn: getAllUserTracks,
-    staleTime: 0,
-    refetchOnMount: true
+    staleTime: 300000, // 5 minutes
+    gcTime: 1800000, // 30 minutes
+    retry: 2,
+    enabled: Boolean(token || localStorage.getItem('spotify_token')) // Only fetch when authenticated
   })
 
   useEffect(() => {
-    if (allUserTracks && allUserTracks.length > 0) {
+    if (!queryLoading) {
       setIsLoading(false)
     }
-  }, [allUserTracks])
+  }, [queryLoading])
 
-  if (!userId) {
-    return <div className="tracks-container">Waiting for user authentication...</div>
+  // Show login message if no authentication
+  if (!token && !localStorage.getItem('spotify_token')) {
+    return (
+      <div className="tracks-container">
+        <div className="login-message">
+          Please connect with Spotify to see everyone's top tracks
+        </div>
+      </div>
+    )
   }
 
   if (error) {
     return <div className="tracks-container">Error loading tracks: {(error as Error).message}</div>
   }
 
-  if (isLoading) {
+  if (isLoading || queryLoading) {
     return <div className="tracks-container">Loading tracks...</div>
   }
 
-  if (!allUserTracks || allUserTracks.length === 0) {
-    return <div className="tracks-container">No tracks found. Try listening to more music!</div>
+  if (!allUserTracks || !Array.isArray(allUserTracks) || allUserTracks.length === 0) {
+    return (
+      <div className="tracks-container">
+        <div className="no-tracks-message">
+          No tracks found. Try listening to more music or invite your friends to join!
+        </div>
+      </div>
+    )
   }
+
+  // Sort the current user's tracks to the top if we have a userId
+  const sortedUserTracks = [...allUserTracks].sort((a, b) => {
+    if (a.user.id === userId) return -1
+    if (b.user.id === userId) return 1
+    return 0
+  })
 
   return (
     <div className="tracks-container">
       <h2>Everyone's Top Tracks</h2>
       <div className="users-grid">
-        {allUserTracks.map((userTracks) => (
+        {sortedUserTracks.map((userTracks: UserTracks) => (
           <div key={userTracks.user.id} className="user-tracks-section">
-            <h3 className="username">{userTracks.user.username}'s Top Tracks</h3>
+            <h3 className="username">
+              {userTracks.user.id === userId ? 'Your' : `${userTracks.user.username}'s`} Top Tracks
+              {userTracks.user.id === userId && <span className="current-user-badge">You</span>}
+            </h3>
             <div className="tracks-grid">
-              {userTracks.tracks.map((track) => (
+              {userTracks.tracks.map((track: Track) => (
                 <div key={track.id} className="track-tile">
                   {track.image_url ? (
                     <img 
                       src={track.image_url} 
                       alt={`${track.album} cover`} 
                       className="album-cover"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="album-cover-placeholder">
