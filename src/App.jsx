@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import TopTracks from './components/TopTracks'
 import { createOrUpdateUser, saveUserTracks } from './lib/supabase'
+import SupabaseTest from './components/SupabaseTest'
 import './App.css'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 // Function to generate code verifier
 const generateCodeVerifier = (length) => {
@@ -26,10 +34,12 @@ const generateCodeChallenge = async (codeVerifier) => {
     .replace(/=+$/, '');
 }
 
-function App() {
+function AppContent() {
   const [token, setToken] = useState(null)
   const [error, setError] = useState(null)
   const [userId, setUserId] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     console.log('App mounted, checking URL parameters');
@@ -39,6 +49,7 @@ function App() {
 
     // If there's a code in the URL, exchange it for an access token
     if (code) {
+      setIsLoading(true);
       const verifier = localStorage.getItem('verifier');
       console.log('Verifier from localStorage:', verifier ? 'Present' : 'Not present');
       
@@ -48,6 +59,7 @@ function App() {
       // Only proceed if we have a verifier
       if (!verifier) {
         console.log('No verifier found, skipping token exchange');
+        setIsLoading(false);
         return;
       }
 
@@ -94,16 +106,43 @@ function App() {
             
             // Save user to database
             const dbUser = await createOrUpdateUser(userData.display_name, userData.id);
-            setUserId(dbUser.id);
-
-            // Get top tracks and save them
-            const tracksResponse = await fetch('https://api.spotify.com/v1/me/top/tracks', {
-              headers: { 'Authorization': `Bearer ${data.access_token}` }
-            });
+            
+            // Get top tracks from the last 4 weeks (short_term)
+            console.log('Fetching top tracks from Spotify...');
+            const tracksResponse = await fetch(
+              'https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=5',
+              {
+                headers: { 'Authorization': `Bearer ${data.access_token}` }
+              }
+            );
             const tracksData = await tracksResponse.json();
+            console.log('Spotify top tracks response:', tracksData);
+            
+            if (!tracksData.items?.length) {
+              console.log('No top tracks found in the last 4 weeks');
+              setError('No top tracks found in the last 4 weeks. Try listening to more music!');
+              setIsLoading(false);
+              return;
+            }
             
             // Save tracks to database
-            await saveUserTracks(dbUser.id, tracksData.items);
+            console.log('Saving tracks to database...', tracksData.items);
+            try {
+              const savedTracks = await saveUserTracks(dbUser.id, tracksData.items);
+              console.log('Tracks saved successfully:', savedTracks);
+              
+              // Set the tracks data in the cache before setting userId
+              queryClient.setQueryData(['tracks', dbUser.id], savedTracks);
+              
+              // Now set the userId to trigger the TopTracks component
+              setUserId(dbUser.id);
+              
+              // Invalidate the query to ensure fresh data
+              await queryClient.invalidateQueries({ queryKey: ['tracks', dbUser.id] });
+            } catch (error) {
+              console.error('Error saving tracks:', error);
+              setError(`Failed to save tracks: ${error.message}`);
+            }
           }
         })
         .catch(error => {
@@ -111,11 +150,12 @@ function App() {
           setError(`Authentication failed: ${error.message}`);
         })
         .finally(() => {
-          // Clean up verifier
+          // Clean up verifier and loading state
           localStorage.removeItem('verifier');
+          setIsLoading(false);
         });
     }
-  }, []);
+  }, [queryClient]);
 
   const handleLogin = async () => {
     const verifier = generateCodeVerifier(128);
@@ -148,35 +188,46 @@ function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="app-container">
-        <header>
-          <h1>
+    <div className="app-container">
+      <header>
+        <h1>
           <span role="img" aria-label="flame">🔥</span>
-            {"Friendify"}
-            <span role="img" aria-label="flame">🔥</span>
-          </h1>
-          {!token ? (
-            <button onClick={handleLogin}>Connect with Spotify</button>
-          ) : (
-            <button onClick={handleLogout}>Logout</button>
-          )}
-        </header>
-        {error && (
-          <div className="error-message">
-            {error}
+          {"Friendify"}
+          <span role="img" aria-label="flame">🔥</span>
+        </h1>
+        {!token ? (
+          <button onClick={handleLogin} disabled={isLoading}>
+            {isLoading ? 'Connecting...' : 'Connect with Spotify'}
+          </button>
+        ) : (
+          <button onClick={handleLogout}>Logout</button>
+        )}
+      </header>
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+      <main>
+        {isLoading ? (
+          <div>Connecting to Spotify...</div>
+        ) : token ? (
+          <TopTracks token={token} userId={userId} />
+        ) : (
+          <div className="login-message">
+            Please login with Spotify to see your top tracks
           </div>
         )}
-        <main>
-          {token ? (
-            <TopTracks token={token} userId={userId} />
-          ) : (
-            <div className="login-message">
-              Please login with Spotify to see your top tracks
-            </div>
-          )}
-        </main>
-      </div>
+      </main>
+      <SupabaseTest userId={userId} />
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppContent />
     </QueryClientProvider>
   )
 }
