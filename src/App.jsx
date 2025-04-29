@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Component } from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
-import TopTracks from './components/TopTracks'
+import TopTracks from './components/TopTracks.tsx'
 import { createOrUpdateUser, saveUserTracks } from './lib/supabase'
 import SupabaseTest from './components/SupabaseTest'
 import './App.css'
@@ -32,6 +32,38 @@ const generateCodeChallenge = async (codeVerifier) => {
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
+}
+
+// Error Boundary Component
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-container">
+          <h2>Something went wrong</h2>
+          <p>{this.state.error?.message || 'An unexpected error occurred'}</p>
+          <button onClick={() => window.location.reload()}>
+            Reload Page
+          </button>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
 }
 
 function AppContent() {
@@ -212,7 +244,9 @@ function AppContent() {
         {isLoading ? (
           <div>Connecting to Spotify...</div>
         ) : token ? (
-          <TopTracks token={token} userId={userId} />
+          <ErrorBoundary>
+            <TopTracks token={token} userId={userId} />
+          </ErrorBoundary>
         ) : (
           <div className="login-message">
             Please login with Spotify to see your top tracks

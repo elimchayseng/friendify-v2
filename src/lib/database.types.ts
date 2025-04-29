@@ -31,7 +31,7 @@ export interface Database {
           name: string
           artist: string
           album: string
-          image_url: string
+          image_url: string | null
           spotify_id: string
           created_at: string
           is_track_of_day: boolean
@@ -41,7 +41,7 @@ export interface Database {
           name: string
           artist: string
           album: string
-          image_url: string
+          image_url?: string | null
           spotify_id: string
           created_at?: string
           is_track_of_day?: boolean

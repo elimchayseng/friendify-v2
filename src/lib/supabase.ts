@@ -74,16 +74,23 @@ export async function saveTrack(track: SpotifyApi.TrackObjectFull) {
       throw fetchError
     }
 
+    // Safely get the image URL
+    const imageUrl = track.album?.images?.[0]?.url || null;
+    console.log('Image URL for track:', track.name, imageUrl);
+
+    const trackData = {
+      name: track.name,
+      artist: track.artists[0].name,
+      album: track.album.name,
+      spotify_id: track.id,
+      ...(imageUrl ? { image_url: imageUrl } : {})
+    }
+
     if (existingTrack) {
       // Update existing track
       const { data, error } = await supabase
         .from('tracks')
-        .update({
-          name: track.name,
-          artist: track.artists[0].name,
-          album: track.album.name,
-          image_url: track.album.images[0]?.url || '',
-        })
+        .update(trackData)
         .eq('id', existingTrack.id)
         .select()
         .single()
@@ -94,13 +101,7 @@ export async function saveTrack(track: SpotifyApi.TrackObjectFull) {
       // Create new track
       const { data, error } = await supabase
         .from('tracks')
-        .insert({
-          name: track.name,
-          artist: track.artists[0].name,
-          album: track.album.name,
-          image_url: track.album.images[0]?.url || '',
-          spotify_id: track.id,
-        })
+        .insert(trackData)
         .select()
         .single()
 
@@ -241,16 +242,17 @@ export async function getAllUserTracks() {
 }
 
 export interface Track {
-  id: string
-  name: string
-  artist: string
-  album: string
-  image_url: string
-  spotify_id: string
-  rank: number
+  id: string;
+  name: string;
+  artist: string;
+  album: string;
+  image_url: string | null;
+  spotify_id: string;
+  rank: number;
 }
 
-interface UserTrackResponse {
+interface UserTrackData {
+  rank: number;
   tracks: {
     id: string;
     name: string;
@@ -259,12 +261,11 @@ interface UserTrackResponse {
     image_url: string | null;
     spotify_id: string;
   };
-  rank: number;
 }
 
 export async function getUserTracks(userId: string): Promise<Track[]> {
   try {
-    console.log('Fetching tracks for userId:', userId);
+    console.log('Getting tracks for user:', userId);
     
     const { data, error } = await supabase
       .from('user_tracks')
@@ -280,56 +281,40 @@ export async function getUserTracks(userId: string): Promise<Track[]> {
         )
       `)
       .eq('user_id', userId)
-      .order('rank', { ascending: true })
+      .order('rank', { ascending: true });
 
     if (error) {
-      console.error('Error fetching user tracks:', error)
-      throw error
+      console.error('Error fetching user tracks:', error);
+      throw error;
     }
 
     if (!data || !Array.isArray(data)) {
-      console.warn('No data or invalid data format received:', data)
-      return []
+      console.warn('No data returned from getUserTracks query');
+      return [];
     }
 
-    console.log('Raw data from Supabase:', data);
+    console.log('Raw user tracks data:', data);
 
-    // Transform and validate the data
-    const tracks: Track[] = data
-      .filter((item: any) => {
-        // Validate the item structure
-        const isValid = item &&
-          typeof item === 'object' &&
-          item.tracks &&
-          typeof item.tracks === 'object' &&
-          typeof item.tracks.id === 'string' &&
-          typeof item.rank === 'number'
-        
-        if (!isValid) {
-          console.warn('Invalid track item:', item)
-        }
-        return isValid
-      })
-      .map((item: any) => {
-        // Create a valid track object with fallbacks
-        const track = {
-          id: item.tracks.id,
-          name: String(item.tracks.name || ''),
-          artist: String(item.tracks.artist || ''),
-          album: String(item.tracks.album || ''),
-          image_url: String(item.tracks.image_url || ''),
-          spotify_id: String(item.tracks.spotify_id || ''),
-          rank: Number(item.rank) || 0
-        }
-        console.log('Processed track:', track)
-        return track
-      })
+    // Transform the data into the expected format
+    const transformedTracks = (data as unknown as UserTrackData[])
+      .filter(item => item.tracks && typeof item.tracks === 'object')
+      .map(item => ({
+        ...item.tracks,
+        rank: item.rank,
+        // Ensure all required fields are present with defaults
+        id: item.tracks.id || '',
+        name: item.tracks.name || 'Unknown Track',
+        artist: item.tracks.artist || 'Unknown Artist',
+        album: item.tracks.album || 'Unknown Album',
+        image_url: item.tracks.image_url || null,
+        spotify_id: item.tracks.spotify_id || ''
+      })) as Track[];
 
-    console.log('Final processed tracks:', tracks)
-    return tracks
+    console.log('Transformed tracks:', transformedTracks);
+    return transformedTracks;
   } catch (error) {
-    console.error('Error in getUserTracks:', error)
-    throw error
+    console.error('Error in getUserTracks:', error);
+    throw error;
   }
 }
 
