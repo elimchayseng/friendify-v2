@@ -1,7 +1,7 @@
 import { useState, useEffect, Component } from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import TopTracks from './components/TopTracks.tsx'
-import { createOrUpdateUser, saveUserTracks } from './lib/supabase'
+import { createOrUpdateUser, saveUserTracks, getAllUserTracks } from './lib/supabase'
 import SupabaseTest from './components/SupabaseTest'
 import './App.css'
 
@@ -10,6 +10,8 @@ const queryClient = new QueryClient({
     queries: {
       retry: false,
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+      cacheTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
     },
   },
 })
@@ -67,46 +69,81 @@ class ErrorBoundary extends Component {
 }
 
 function AppContent() {
-  const [token, setToken] = useState(null)
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem('spotify_token') || null
+  })
   const [error, setError] = useState(null)
-  const [userId, setUserId] = useState(null)
+  const [userId, setUserId] = useState(() => {
+    return localStorage.getItem('user_id') || null
+  })
   const [isLoading, setIsLoading] = useState(false)
   const queryClient = useQueryClient()
 
+  // Effect to validate stored token on mount
   useEffect(() => {
-    console.log('App mounted, checking URL parameters');
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    console.log('Code from URL:', code ? 'Present' : 'Not present');
+    const validateStoredToken = async () => {
+      const storedToken = localStorage.getItem('spotify_token')
+      if (!storedToken) return
 
-    // If there's a code in the URL, exchange it for an access token
+      try {
+        const response = await fetch('https://api.spotify.com/v1/me', {
+          headers: { 'Authorization': `Bearer ${storedToken}` }
+        })
+
+        if (!response.ok) {
+          // Token is invalid, clear storage and state
+          handleLogout()
+        }
+      } catch (error) {
+        console.error('Error validating token:', error)
+        handleLogout()
+      }
+    }
+
+    validateStoredToken()
+  }, [])
+
+  // Effect to handle stored user data on mount
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('user_id')
+    const storedUsername = localStorage.getItem('username')
+    
+    if (storedUserId && storedUsername) {
+      setUserId(storedUserId)
+      // Prefetch tracks data if we have a stored userId
+      queryClient.prefetchQuery({
+        queryKey: ['all-user-tracks'],
+        queryFn: getAllUserTracks,
+      })
+    }
+  }, [queryClient])
+
+  useEffect(() => {
+    console.log('App mounted, checking URL parameters')
+    const urlParams = new URLSearchParams(window.location.search)
+    const code = urlParams.get('code')
+    console.log('Code from URL:', code ? 'Present' : 'Not present')
+
     if (code) {
-      setIsLoading(true);
-      const verifier = localStorage.getItem('verifier');
-      console.log('Verifier from localStorage:', verifier ? 'Present' : 'Not present');
+      setIsLoading(true)
+      const verifier = localStorage.getItem('verifier')
+      console.log('Verifier from localStorage:', verifier ? 'Present' : 'Not present')
       
-      // Clear the URL parameters immediately to prevent reuse
-      window.history.replaceState({}, document.title, "/");
+      window.history.replaceState({}, document.title, "/")
 
-      // Only proceed if we have a verifier
       if (!verifier) {
-        console.log('No verifier found, skipping token exchange');
-        setIsLoading(false);
-        return;
+        console.log('No verifier found, skipping token exchange')
+        setIsLoading(false)
+        return
       }
 
-      console.log('Starting token exchange with Spotify');
-      const params = new URLSearchParams();
-      params.append("client_id", import.meta.env.VITE_SPOTIFY_CLIENT_ID);
-      params.append("grant_type", "authorization_code");
-      params.append("code", code);
-      params.append("redirect_uri", import.meta.env.VITE_REDIRECT_URI);
-      params.append("code_verifier", verifier);
-
-      console.log('Token exchange parameters:', {
-        client_id: import.meta.env.VITE_SPOTIFY_CLIENT_ID,
-        redirect_uri: import.meta.env.VITE_REDIRECT_URI
-      });
+      console.log('Starting token exchange with Spotify')
+      const params = new URLSearchParams()
+      params.append("client_id", import.meta.env.VITE_SPOTIFY_CLIENT_ID)
+      params.append("grant_type", "authorization_code")
+      params.append("code", code)
+      params.append("redirect_uri", import.meta.env.VITE_REDIRECT_URI)
+      params.append("code_verifier", verifier)
 
       fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
@@ -114,109 +151,110 @@ function AppContent() {
         body: params
       })
         .then(async response => {
-          console.log('Token exchange response status:', response.status);
-          const data = await response.json();
+          console.log('Token exchange response status:', response.status)
+          const data = await response.json()
           if (!response.ok) {
-            console.log('Token exchange error:', data);
+            console.log('Token exchange error:', data)
             if (data.error === 'invalid_grant') {
-              console.log('Invalid grant - likely a page refresh or reused code');
-              return null;
+              console.log('Invalid grant - likely a page refresh or reused code')
+              return null
             }
-            throw new Error(`${data.error_description || data.error}`);
+            throw new Error(`${data.error_description || data.error}`)
           }
-          return data;
+          return data
         })
         .then(async data => {
           if (data && data.access_token) {
-            setToken(data.access_token);
+            // Store token in localStorage
+            localStorage.setItem('spotify_token', data.access_token)
+            setToken(data.access_token)
             
             // Get user profile from Spotify
             const userResponse = await fetch('https://api.spotify.com/v1/me', {
               headers: { 'Authorization': `Bearer ${data.access_token}` }
-            });
-            const userData = await userResponse.json();
+            })
+            const userData = await userResponse.json()
             
-            // Save user to database
-            const dbUser = await createOrUpdateUser(userData.display_name, userData.id);
+            // Save user to database and localStorage
+            const dbUser = await createOrUpdateUser(userData.display_name, userData.id)
+            localStorage.setItem('user_id', dbUser.id)
+            localStorage.setItem('username', userData.display_name)
             
-            // Get top tracks from the last 4 weeks (short_term)
-            console.log('Fetching top tracks from Spotify...');
+            // Get top tracks
+            console.log('Fetching top tracks from Spotify...')
             const tracksResponse = await fetch(
               'https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=5',
               {
                 headers: { 'Authorization': `Bearer ${data.access_token}` }
               }
-            );
-            const tracksData = await tracksResponse.json();
-            console.log('Spotify top tracks response:', tracksData);
+            )
+            const tracksData = await tracksResponse.json()
+            console.log('Spotify top tracks response:', tracksData)
             
             if (!tracksData.items?.length) {
-              console.log('No top tracks found in the last 4 weeks');
-              setError('No top tracks found in the last 4 weeks. Try listening to more music!');
-              setIsLoading(false);
-              return;
+              console.log('No top tracks found in the last 4 weeks')
+              setError('No top tracks found in the last 4 weeks. Try listening to more music!')
+              setIsLoading(false)
+              return
             }
             
-            // Save tracks to database
-            console.log('Saving tracks to database...', tracksData.items);
             try {
-              const savedTracks = await saveUserTracks(dbUser.id, tracksData.items);
-              console.log('Tracks saved successfully:', savedTracks);
+              const savedTracks = await saveUserTracks(dbUser.id, tracksData.items)
+              console.log('Tracks saved successfully:', savedTracks)
               
-              // Set the tracks data in the cache before setting userId
-              queryClient.setQueryData(['tracks', dbUser.id], savedTracks);
-              
-              // Now set the userId to trigger the TopTracks component
-              setUserId(dbUser.id);
-              
-              // Invalidate the query to ensure fresh data
-              await queryClient.invalidateQueries({ queryKey: ['tracks', dbUser.id] });
+              queryClient.setQueryData(['tracks', dbUser.id], savedTracks)
+              setUserId(dbUser.id)
+              await queryClient.invalidateQueries({ queryKey: ['all-user-tracks'] })
             } catch (error) {
-              console.error('Error saving tracks:', error);
-              setError(`Failed to save tracks: ${error.message}`);
+              console.error('Error saving tracks:', error)
+              setError(`Failed to save tracks: ${error.message}`)
             }
           }
         })
         .catch(error => {
-          console.error('Token exchange error:', error);
-          setError(`Authentication failed: ${error.message}`);
+          console.error('Token exchange error:', error)
+          setError(`Authentication failed: ${error.message}`)
         })
         .finally(() => {
-          // Clean up verifier and loading state
-          localStorage.removeItem('verifier');
-          setIsLoading(false);
-        });
+          localStorage.removeItem('verifier')
+          setIsLoading(false)
+        })
     }
-  }, [queryClient]);
+  }, [queryClient])
 
   const handleLogin = async () => {
-    const verifier = generateCodeVerifier(128);
-    const challenge = await generateCodeChallenge(verifier);
-    
-    // Store verifier in localStorage to use later
-    localStorage.setItem('verifier', verifier);
+    const verifier = generateCodeVerifier(128)
+    const challenge = await generateCodeChallenge(verifier)
+    localStorage.setItem('verifier', verifier)
+    console.log('Client ID:', import.meta.env.VITE_SPOTIFY_CLIENT_ID)
 
-    // Log the client ID to make sure it exists
-    console.log('Client ID:', import.meta.env.VITE_SPOTIFY_CLIENT_ID);
+    const params = new URLSearchParams()
+    params.append("client_id", import.meta.env.VITE_SPOTIFY_CLIENT_ID)
+    params.append("response_type", "code")
+    params.append("redirect_uri", import.meta.env.VITE_REDIRECT_URI)
+    params.append("scope", "user-top-read")
+    params.append("code_challenge_method", "S256")
+    params.append("code_challenge", challenge)
 
-    const params = new URLSearchParams();
-    params.append("client_id", import.meta.env.VITE_SPOTIFY_CLIENT_ID);
-    params.append("response_type", "code");
-    params.append("redirect_uri", import.meta.env.VITE_REDIRECT_URI);
-    params.append("scope", "user-top-read");
-    params.append("code_challenge_method", "S256");
-    params.append("code_challenge", challenge);
-
-    // Log the full URL for debugging
-    const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`;
-    console.log('Authorization URL:', authUrl);
-
-    window.location = authUrl;
+    const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`
+    console.log('Authorization URL:', authUrl)
+    window.location = authUrl
   }
 
   const handleLogout = () => {
+    // Clear all stored data
+    localStorage.removeItem('spotify_token')
+    localStorage.removeItem('user_id')
+    localStorage.removeItem('username')
+    localStorage.removeItem('verifier')
+    
+    // Clear state
     setToken(null)
+    setUserId(null)
     setError(null)
+    
+    // Clear query cache
+    queryClient.clear()
   }
 
   return (
@@ -243,14 +281,10 @@ function AppContent() {
       <main>
         {isLoading ? (
           <div>Connecting to Spotify...</div>
-        ) : token ? (
+        ) : (
           <ErrorBoundary>
             <TopTracks token={token} userId={userId} />
           </ErrorBoundary>
-        ) : (
-          <div className="login-message">
-            Please login with Spotify to see your top tracks
-          </div>
         )}
       </main>
       <SupabaseTest userId={userId} />
