@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import TopTracks from './components/TopTracks'
+import { createOrUpdateUser, saveUserTracks } from './lib/supabase'
 import './App.css'
 
 const queryClient = new QueryClient()
@@ -28,14 +29,18 @@ const generateCodeChallenge = async (codeVerifier) => {
 function App() {
   const [token, setToken] = useState(null)
   const [error, setError] = useState(null)
+  const [userId, setUserId] = useState(null)
 
   useEffect(() => {
+    console.log('App mounted, checking URL parameters');
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    console.log('Code from URL:', code ? 'Present' : 'Not present');
 
     // If there's a code in the URL, exchange it for an access token
     if (code) {
       const verifier = localStorage.getItem('verifier');
+      console.log('Verifier from localStorage:', verifier ? 'Present' : 'Not present');
       
       // Clear the URL parameters immediately to prevent reuse
       window.history.replaceState({}, document.title, "/");
@@ -46,6 +51,7 @@ function App() {
         return;
       }
 
+      console.log('Starting token exchange with Spotify');
       const params = new URLSearchParams();
       params.append("client_id", import.meta.env.VITE_SPOTIFY_CLIENT_ID);
       params.append("grant_type", "authorization_code");
@@ -53,15 +59,21 @@ function App() {
       params.append("redirect_uri", import.meta.env.VITE_REDIRECT_URI);
       params.append("code_verifier", verifier);
 
+      console.log('Token exchange parameters:', {
+        client_id: import.meta.env.VITE_SPOTIFY_CLIENT_ID,
+        redirect_uri: import.meta.env.VITE_REDIRECT_URI
+      });
+
       fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: params
       })
         .then(async response => {
+          console.log('Token exchange response status:', response.status);
           const data = await response.json();
           if (!response.ok) {
-            // Don't show error for invalid_grant as it's likely just a page refresh
+            console.log('Token exchange error:', data);
             if (data.error === 'invalid_grant') {
               console.log('Invalid grant - likely a page refresh or reused code');
               return null;
@@ -70,9 +82,28 @@ function App() {
           }
           return data;
         })
-        .then(data => {
+        .then(async data => {
           if (data && data.access_token) {
             setToken(data.access_token);
+            
+            // Get user profile from Spotify
+            const userResponse = await fetch('https://api.spotify.com/v1/me', {
+              headers: { 'Authorization': `Bearer ${data.access_token}` }
+            });
+            const userData = await userResponse.json();
+            
+            // Save user to database
+            const dbUser = await createOrUpdateUser(userData.display_name, userData.id);
+            setUserId(dbUser.id);
+
+            // Get top tracks and save them
+            const tracksResponse = await fetch('https://api.spotify.com/v1/me/top/tracks', {
+              headers: { 'Authorization': `Bearer ${data.access_token}` }
+            });
+            const tracksData = await tracksResponse.json();
+            
+            // Save tracks to database
+            await saveUserTracks(dbUser.id, tracksData.items);
           }
         })
         .catch(error => {
@@ -138,7 +169,7 @@ function App() {
         )}
         <main>
           {token ? (
-            <TopTracks token={token} />
+            <TopTracks token={token} userId={userId} />
           ) : (
             <div className="login-message">
               Please login with Spotify to see your top tracks
