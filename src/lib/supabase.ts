@@ -251,46 +251,63 @@ export interface Track {
 }
 
 interface UserTrackResponse {
-  rank: number
   tracks: {
-    id: string
-    name: string
-    artist: string
-    album: string
-    image_url: string
-    spotify_id: string
-  }
+    id: string;
+    name: string;
+    artist: string;
+    album: string;
+    image_url: string | null;
+    spotify_id: string;
+  };
+  rank: number;
 }
 
 export async function getUserTracks(userId: string): Promise<Track[]> {
-  const { data, error } = await supabase
-    .from('user_tracks')
-    .select(`
-      rank,
-      tracks (
-        id,
-        name,
-        artist,
-        album,
-        image_url,
-        spotify_id
-      )
-    `)
-    .eq('user_id', userId)
-    .order('rank', { ascending: true })
-    .limit(5)
+  try {
+    const { data, error } = await supabase
+      .from('user_tracks')
+      .select(`
+        rank,
+        tracks (
+          id,
+          name,
+          artist,
+          album,
+          image_url,
+          spotify_id
+        )
+      `)
+      .eq('user_id', userId)
+      .order('rank', { ascending: true })
 
-  if (error) {
-    console.error('Error fetching user tracks:', error)
+    if (error) {
+      console.error('Error fetching user tracks:', error)
+      throw error
+    }
+
+    if (!data) {
+      return []
+    }
+
+    // Transform and validate the data
+    const tracks: Track[] = data
+      .filter((item: any) => item.tracks && typeof item.tracks === 'object')
+      .map((item: any) => ({
+        id: item.tracks.id || '',
+        name: item.tracks.name || '',
+        artist: item.tracks.artist || '',
+        album: item.tracks.album || '',
+        image_url: item.tracks.image_url || '',
+        spotify_id: item.tracks.spotify_id || '',
+        rank: item.rank || 0
+      }))
+
+    console.log('Processed tracks:', tracks)
+    return tracks
+  } catch (error) {
+    console.error('Error in getUserTracks:', error)
     throw error
   }
-
-  // Transform the data to match the Track interface
-  const typedData = data as unknown as UserTrackResponse[]
-  return (typedData || []).map(item => ({
-    ...item.tracks,
-    rank: item.rank
-  }))
 }
 
 export async function getTrackOfDay() {

@@ -26,6 +26,7 @@ function TopTracks({ token, userId }: { token: string, userId: string }) {
     queryKey: ['tracks', userId],
     queryFn: async () => {
       const result = await getUserTracks(userId)
+      console.log('Fetched tracks:', result)
       return result
     },
     enabled: !!userId,
@@ -65,6 +66,7 @@ function TopTracks({ token, userId }: { token: string, userId: string }) {
   }
 
   if (error) {
+    console.error('Error in TopTracks:', error)
     return <div>Error loading tracks: {(error as Error).message}</div>
   }
 
@@ -72,7 +74,7 @@ function TopTracks({ token, userId }: { token: string, userId: string }) {
     return <div>Loading your top tracks...</div>
   }
 
-  if (!tracks || tracks.length === 0) {
+  if (!tracks || !Array.isArray(tracks) || tracks.length === 0) {
     return <div>No tracks found. Try adding some songs!</div>
   }
 
@@ -80,19 +82,29 @@ function TopTracks({ token, userId }: { token: string, userId: string }) {
     <div className="tracks-container">
       <h2>Your Top Tracks</h2>
       <div className="tracks-grid">
-        {tracks.map((track: Track) => (
-          <div key={track.id} className="track-card">
-            {track.image_url && (
-              <img src={track.image_url} alt={`${track.name} album art`} />
-            )}
-            <div className="track-info">
-              <h3>{track.name}</h3>
-              <p>{track.artist}</p>
-              <p className="album-name">{track.album}</p>
-              <span className="rank">#{track.rank}</span>
+        {tracks.map((track: Track) => {
+          if (!track) return null // Skip if track is null
+          
+          return (
+            <div key={track.id || 'unknown'} className="track-card">
+              {track.image_url && (
+                <img 
+                  src={track.image_url} 
+                  alt={`${track.name || 'Unknown track'} album art`}
+                  onError={(e) => {
+                    e.currentTarget.src = '/default-album-art.png' // Fallback image
+                  }}
+                />
+              )}
+              <div className="track-info">
+                <h3>{track.name || 'Unknown Track'}</h3>
+                <p>{track.artist || 'Unknown Artist'}</p>
+                <p className="album-name">{track.album || 'Unknown Album'}</p>
+                <span className="rank">#{track.rank || '?'}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
