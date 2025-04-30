@@ -1,46 +1,87 @@
-.tracks-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.login-message, .no-tracks-message {
-  text-align: center;
-  padding: 40px;
+html, body, #root {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #0a0a0a;
   color: white;
-  font-size: 1.2rem;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  margin: 20px 0;
 }
 
-.login-message {
-  border: 1px solid rgba(29, 185, 84, 0.2);
-  color: #1DB954;
+/* Main container */
+.tracks-container {
+  flex: 1;
+  width: 100%;
+  max-width: 90%;
+  min-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  background-color: #0a0a0a;
 }
 
 .users-grid {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 32px;
+  width: 100%;
+  padding: 0;
+  background-color: transparent;
 }
 
 .user-tracks-section {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  padding: 20px;
-  transition: transform 0.2s ease;
+  width: 100%;
+  background-color: rgba(18, 18, 18, 0.95);
+  border-radius: 16px;
+  padding: 32px;
+  margin: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .user-tracks-section:first-child {
-  background: rgba(29, 185, 84, 0.1);
+  background-color: rgba(29, 185, 84, 0.05);
   border: 1px solid rgba(29, 185, 84, 0.2);
+  box-shadow: 0 4px 15px rgba(29, 185, 84, 0.1);
+}
+
+.tracks-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin-top: 24px;
+  background-color: transparent;
+}
+
+/* Message containers should also fill available space */
+.login-message, .no-tracks-message {
+  width: 100%;
+  text-align: center;
+  padding: 40px;
+  color: white;
+  font-size: 1.2rem;
+  background: rgba(18, 18, 18, 0.95);
+  border-radius: 12px;
+  margin: 20px 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.login-message {
+  border: 1px solid rgba(29, 185, 84, 0.2);
+  color: #1DB954;
+  background: rgba(29, 185, 84, 0.05);
 }
 
 .username {
   color: #1DB954;
-  margin: 0 0 20px 0;
-  font-size: 1.5rem;
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -55,53 +96,33 @@
   font-weight: bold;
 }
 
-.tracks-grid {
-  display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  padding: 10px 0;
-  scrollbar-width: thin;
-  scrollbar-color: #1DB954 rgba(255, 255, 255, 0.1);
-  -webkit-overflow-scrolling: touch;
-}
-
-.tracks-grid::-webkit-scrollbar {
-  height: 8px;
-}
-
-.tracks-grid::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.tracks-grid::-webkit-scrollbar-thumb {
-  background: #1DB954;
-  border-radius: 4px;
-}
-
 .track-tile {
-  flex: 0 0 auto;
-  width: 200px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  overflow: hidden;
+  width: 100%;
+  height: 100px;
+  background-color: rgba(24, 24, 24, 0.95);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .track-tile:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(29, 185, 84, 0.2);
+  transform: translateX(5px);
+  background-color: rgba(29, 185, 84, 0.1);
+  border: 1px solid rgba(29, 185, 84, 0.2);
+  box-shadow: -5px 0 15px rgba(29, 185, 84, 0.1);
 }
 
 .album-cover, .album-cover-placeholder {
-  width: 200px;
-  height: 200px;
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
   object-fit: cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .album-cover-placeholder span {
@@ -109,38 +130,46 @@
 }
 
 .track-info {
-  padding: 15px;
-  color: white;
-  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
-}
-
-.track-rank {
-  display: inline-block;
-  background: #1DB954;
-  color: black;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  margin-bottom: 8px;
+  flex: 1;
+  padding: 20px 24px;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
 .track-name {
-  margin: 8px 0;
-  font-size: 1.1rem;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: white;
 }
 
 .track-artist, .track-album {
-  margin: 4px 0;
-  font-size: 0.9rem;
+  margin: 0;
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.track-rank {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  background: #1DB954;
+  color: black;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  z-index: 1;
 }
 
 /* Loading state styles */
@@ -149,4 +178,38 @@
   padding: 40px;
   color: white;
   font-size: 1.2rem;
+}
+
+/* Ensure all elements use border-box */
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+/* Add responsive breakpoints */
+@media (max-width: 1400px) {
+  .tracks-container {
+    max-width: 95%;
+    min-width: 1000px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .tracks-container {
+    max-width: 100%;
+    min-width: 800px;
+    padding: 20px;
+  }
+  
+  .user-tracks-section {
+    padding: 24px;
+  }
+  
+  .track-tile {
+    height: 80px;
+  }
+  
+  .album-cover, .album-cover-placeholder {
+    width: 80px;
+    height: 80px;
+  }
 } 
