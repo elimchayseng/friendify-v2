@@ -297,16 +297,23 @@ function AppContent() {
   return (
     <div className="app-container">
       <header>
-        <h1>
-          <span role="img" aria-label="flame">🔥</span>
-          {"Friendify"}
-          <span role="img" aria-label="flame">🔥</span>
-        </h1>
-        {!token ? (
-          <button onClick={handleLogin} disabled={isLoading}>
-            {isLoading ? 'Connecting...' : 'Connect with Spotify'}
+        <div className="footer-text-container">
+          <div className="footer-link" onClick={() => window.location.reload()}>
+            <h2 className="metallic-text" data-text="Friendify">Friendify</h2>
+          </div>
+          <div className="creator-container">
+            <a href="https://www.limchayseng.com/" target="_blank" rel="noopener noreferrer" className="footer-link">
+              <span className="creator-text">by Ethan</span>
+            </a>
+            <img src="/images/skull-ethan-logo.png" alt="Ethan's skull logo" className="creator-logo" />
+          </div>
+        </div>
+        {!token && !isLoading && (
+          <button onClick={handleLogin}>
+            Connect with Spotify
           </button>
-        ) : (
+        )}
+        {token && (
           <button onClick={handleLogout}>Logout</button>
         )}
       </header>
@@ -318,10 +325,14 @@ function AppContent() {
       <main>
         {isLoading ? (
           <div>Connecting to Spotify...</div>
-        ) : (
+        ) : token ? (
           <ErrorBoundary>
             <TopTracks token={token} userId={userId} />
           </ErrorBoundary>
+        ) : (
+          <div className="landing-message">
+            <p>✨ Please connect with Spotify to see everyone's top tracks ✨</p>
+          </div>
         )}
       </main>
     </div>
