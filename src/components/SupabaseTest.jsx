@@ -46,12 +46,22 @@ function SupabaseTest({ userId }) {
         })
 
         // Test 3: Try to insert a test track
+        const generateSpotifyLikeId = () => {
+          const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+          const timestamp = Date.now().toString(36);
+          let result = 'T'; // Start with non-zero character
+          for (let i = 0; i < 21; i++) {
+            result += chars[Math.floor(Math.random() * chars.length)];
+          }
+          return result;
+        };
+
         const testTrack = {
           name: 'Test Track',
           artist: 'Test Artist',
           album: 'Test Album',
           image_url: 'https://example.com/image.jpg',
-          spotify_id: `test_${Date.now()}`
+          spotify_id: generateSpotifyLikeId() // Example: 'T1234567890123456789AB'
         }
 
         console.log('Attempting to insert track:', testTrack)
@@ -61,9 +71,9 @@ function SupabaseTest({ userId }) {
           .from('tracks')
           .select('id, spotify_id, name, artist, album, image_url')
           .eq('spotify_id', testTrack.spotify_id)
-          .single()
+          .maybeSingle()
 
-        if (fetchError && fetchError.code !== 'PGRST116') {
+        if (fetchError) {
           throw fetchError
         }
 
@@ -237,7 +247,12 @@ function SupabaseTest({ userId }) {
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
+    <div style={{ 
+      padding: '20px', 
+      maxWidth: '600px', 
+      margin: '0 auto',
+      color: 'black'
+    }}>
       <h2>Supabase Connection Test</h2>
       <div style={{ 
         padding: '15px',
