@@ -26,17 +26,25 @@ const generateCodeVerifier = (length) => {
   return text;
 }
 
+// Function to base64url encode an array buffer
+const base64urlEncode = (arrayBuffer) => {
+  const bytes = new Uint8Array(arrayBuffer);
+  let str = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    str += String.fromCharCode(bytes[i]);
+  }
+  return btoa(str)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
 // Function to generate code challenge
 const generateCodeChallenge = async (codeVerifier) => {
   const encoder = new TextEncoder();
   const data = encoder.encode(codeVerifier);
   const digest = await window.crypto.subtle.digest('SHA-256', data);
-  
-  // Convert the digest to base64url format
-  return btoa(String.fromCharCode(...new Uint8Array(digest)))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  return base64urlEncode(digest);
 }
 
 // Error Boundary Component
@@ -135,12 +143,16 @@ function AppContent() {
       window.history.replaceState({}, document.title, "/")
 
       if (!verifier) {
-        console.log('No verifier found, skipping token exchange')
+        const error = 'No verifier found in localStorage. Please try logging in again.'
+        console.error(error)
+        setError(error)
         setIsLoading(false)
         return
       }
 
       console.log('Starting token exchange with Spotify')
+      console.log('Using verifier:', verifier)
+      
       const params = new URLSearchParams()
       params.append("client_id", import.meta.env.VITE_SPOTIFY_CLIENT_ID)
       params.append("grant_type", "authorization_code")
@@ -160,23 +172,34 @@ function AppContent() {
             console.log('Token exchange error:', data)
             if (data.error === 'invalid_grant') {
               console.log('Invalid grant - likely a page refresh or reused code')
-              return null
+              throw new Error('Authentication session expired. Please try logging in again.')
             }
-            throw new Error(`${data.error_description || data.error}`)
+            throw new Error(data.error_description || data.error || 'Failed to exchange code for token')
           }
           return data
         })
         .then(async data => {
-          if (data && data.access_token) {
-            // Store token in localStorage
-            localStorage.setItem('spotify_token', data.access_token)
-            setToken(data.access_token)
-            
+          if (!data || !data.access_token) {
+            throw new Error('No access token received from Spotify')
+          }
+
+          console.log('Successfully received access token')
+          localStorage.setItem('spotify_token', data.access_token)
+          setToken(data.access_token)
+          
+          try {
             // Get user profile from Spotify
+            console.log('Fetching user profile...')
             const userResponse = await fetch('https://api.spotify.com/v1/me', {
               headers: { 'Authorization': `Bearer ${data.access_token}` }
             })
+            
+            if (!userResponse.ok) {
+              throw new Error('Failed to fetch user profile from Spotify')
+            }
+            
             const userData = await userResponse.json()
+            console.log('Successfully fetched user profile:', userData.display_name)
             
             // Save user to database and localStorage
             const dbUser = await createOrUpdateUser(userData.display_name, userData.id)
@@ -191,32 +214,35 @@ function AppContent() {
                 headers: { 'Authorization': `Bearer ${data.access_token}` }
               }
             )
+            
+            if (!tracksResponse.ok) {
+              throw new Error('Failed to fetch top tracks from Spotify')
+            }
+            
             const tracksData = await tracksResponse.json()
-            console.log('Spotify top tracks response:', tracksData)
+            console.log('Successfully fetched top tracks')
             
             if (!tracksData.items?.length) {
               console.log('No top tracks found in the last 4 weeks')
               setError('No top tracks found in the last 4 weeks. Try listening to more music!')
-              setIsLoading(false)
               return
             }
             
-            try {
-              const savedTracks = await saveUserTracks(dbUser.id, tracksData.items)
-              console.log('Tracks saved successfully:', savedTracks)
-              
-              queryClient.setQueryData(['tracks', dbUser.id], savedTracks)
-              setUserId(dbUser.id)
-              await queryClient.invalidateQueries({ queryKey: ['all-user-tracks'] })
-            } catch (error) {
-              console.error('Error saving tracks:', error)
-              setError(`Failed to save tracks: ${error.message}`)
-            }
+            const savedTracks = await saveUserTracks(dbUser.id, tracksData.items)
+            console.log('Tracks saved successfully:', savedTracks)
+            
+            queryClient.setQueryData(['tracks', dbUser.id], savedTracks)
+            setUserId(dbUser.id)
+            await queryClient.invalidateQueries({ queryKey: ['all-user-tracks'] })
+          } catch (error) {
+            console.error('Error during data fetching:', error)
+            throw error
           }
         })
         .catch(error => {
-          console.error('Token exchange error:', error)
+          console.error('Authentication error:', error)
           setError(`Authentication failed: ${error.message}`)
+          handleLogout() // Clean up any partial state on error
         })
         .finally(() => {
           localStorage.removeItem('verifier')
@@ -226,22 +252,31 @@ function AppContent() {
   }, [queryClient])
 
   const handleLogin = async () => {
-    const verifier = generateCodeVerifier(128)
-    const challenge = await generateCodeChallenge(verifier)
-    localStorage.setItem('verifier', verifier)
-    console.log('Client ID:', import.meta.env.VITE_SPOTIFY_CLIENT_ID)
+    try {
+      const verifier = generateCodeVerifier(128)
+      console.log('Generated verifier length:', verifier.length)
+      
+      const challenge = await generateCodeChallenge(verifier)
+      console.log('Generated challenge length:', challenge.length)
+      
+      localStorage.setItem('verifier', verifier)
+      console.log('Stored verifier in localStorage')
+      
+      const params = new URLSearchParams()
+      params.append("client_id", import.meta.env.VITE_SPOTIFY_CLIENT_ID)
+      params.append("response_type", "code")
+      params.append("redirect_uri", import.meta.env.VITE_REDIRECT_URI)
+      params.append("scope", "user-top-read")
+      params.append("code_challenge_method", "S256")
+      params.append("code_challenge", challenge)
 
-    const params = new URLSearchParams()
-    params.append("client_id", import.meta.env.VITE_SPOTIFY_CLIENT_ID)
-    params.append("response_type", "code")
-    params.append("redirect_uri", import.meta.env.VITE_REDIRECT_URI)
-    params.append("scope", "user-top-read")
-    params.append("code_challenge_method", "S256")
-    params.append("code_challenge", challenge)
-
-    const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`
-    console.log('Authorization URL:', authUrl)
-    window.location = authUrl
+      const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`
+      console.log('Starting Spotify authorization...')
+      window.location = authUrl
+    } catch (error) {
+      console.error('Error during login setup:', error)
+      setError('Failed to initialize login. Please try again.')
+    }
   }
 
   const handleLogout = () => {
