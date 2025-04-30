@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
 // Function to generate code verifier
 const generateCodeVerifier = (length) => {
   let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
   for (let i = 0; i < length; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
@@ -28,9 +28,12 @@ const generateCodeVerifier = (length) => {
 
 // Function to generate code challenge
 const generateCodeChallenge = async (codeVerifier) => {
-  const data = new TextEncoder().encode(codeVerifier);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(codeVerifier);
   const digest = await window.crypto.subtle.digest('SHA-256', data);
-  return btoa(String.fromCharCode.apply(null, [...new Uint8Array(digest)]))
+  
+  // Convert the digest to base64url format
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
