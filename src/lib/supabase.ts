@@ -327,47 +327,4 @@ export async function getTrackOfDay() {
 
   if (error) throw error
   return data
-}
-
-export async function cleanupAllTables() {
-  try {
-    // First delete from user_tracks (junction table)
-    const { error: userTracksError } = await supabase
-      .from('user_tracks')
-      .delete()
-      .gte('user_id', '00000000-0000-0000-0000-000000000000') // This will match all UUIDs
-
-    if (userTracksError) {
-      console.error('Error cleaning user_tracks:', userTracksError)
-      throw userTracksError
-    }
-
-    // Then delete from tracks
-    const { error: tracksError } = await supabase
-      .from('tracks')
-      .delete()
-      .gte('id', '00000000-0000-0000-0000-000000000000') // This will match all UUIDs
-
-    if (tracksError) {
-      console.error('Error cleaning tracks:', tracksError)
-      throw tracksError
-    }
-
-    // Finally delete from users
-    const { error: usersError } = await supabase
-      .from('users')
-      .delete()
-      .gte('id', '00000000-0000-0000-0000-000000000000') // This will match all UUIDs
-
-    if (usersError) {
-      console.error('Error cleaning users:', usersError)
-      throw usersError
-    }
-
-    console.log('All tables cleaned successfully')
-    return true
-  } catch (error) {
-    console.error('Error during cleanup:', error)
-    throw error
-  }
 } 

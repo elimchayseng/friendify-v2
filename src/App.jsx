@@ -2,7 +2,6 @@ import { useState, useEffect, Component } from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import TopTracks from './components/TopTracks.tsx'
 import { createOrUpdateUser, saveUserTracks, getAllUserTracks } from './lib/supabase'
-import SupabaseTest from './components/SupabaseTest'
 import './App.css'
 
 const queryClient = new QueryClient({
@@ -325,7 +324,6 @@ function AppContent() {
           </ErrorBoundary>
         )}
       </main>
-      <SupabaseTest userId={userId} />
     </div>
   )
 }

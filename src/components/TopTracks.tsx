@@ -87,7 +87,13 @@ function TopTracks({ token, userId }: { token: string | null, userId: string | n
             </h3>
             <div className="tracks-grid">
               {userTracks.tracks.map((track: Track) => (
-                <div key={track.id} className="track-tile">
+                <a 
+                  key={track.id} 
+                  className="track-tile"
+                  href={`https://open.spotify.com/track/${track.spotify_id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {track.image_url ? (
                     <img 
                       src={track.image_url} 
@@ -106,7 +112,7 @@ function TopTracks({ token, userId }: { token: string | null, userId: string | n
                     <p className="track-artist">{track.artist}</p>
                     <p className="track-album">{track.album}</p>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
           </div>
