@@ -12,12 +12,19 @@ html, body, #root {
   color: white;
 }
 
+/* Wrapper to center the content */
+.tracks-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background-color: #0a0a0a;
+}
+
 /* Main container */
 .tracks-container {
   flex: 1;
   width: 100%;
-  max-width: 90%;
-  min-width: 1200px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 40px;
   display: flex;
@@ -39,7 +46,7 @@ html, body, #root {
   width: 100%;
   background-color: rgba(18, 18, 18, 0.95);
   border-radius: 16px;
-  padding: 32px;
+  padding: 24px;
   margin: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -55,9 +62,9 @@ html, body, #root {
 .tracks-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
-  margin-top: 24px;
+  margin-top: 20px;
   background-color: transparent;
 }
 
@@ -71,7 +78,7 @@ html, body, #root {
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  padding-right: 16px;
+  padding-right: 12px;
 }
 
 .track-list-item:hover {
@@ -100,7 +107,7 @@ html, body, #root {
 
 .username {
   color: #1DB954;
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
   font-size: 1.2rem;
   display: flex;
   align-items: center;
@@ -128,8 +135,8 @@ html, body, #root {
 }
 
 .album-cover, .album-cover-placeholder {
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
   background-color: rgba(0, 0, 0, 0.3);
 }
@@ -141,22 +148,22 @@ html, body, #root {
 }
 
 .album-cover-placeholder span {
-  font-size: 32px;
+  font-size: 28px;
 }
 
 /* Track rank - new position for list view */
 .track-rank {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #1DB954;
   color: black;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 0.9rem;
   flex-shrink: 0;
-  margin: 0 16px;
+  margin: 0 12px 0 8px;
 }
 
 /* Track details container - new style for list items */
