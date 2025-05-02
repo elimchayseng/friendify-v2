@@ -101,14 +101,14 @@ const updateTrackHandler: RequestHandler = async (req, res) => {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       details: error instanceof PostgrestError ? {
-        code: error.code,
-        details: error.details,
-        hint: error.hint
+        code: (error as PostgrestError).code,
+        details: (error as PostgrestError).details,
+        hint: (error as PostgrestError).hint
       } : undefined
     })
 
     const errorMessage = error instanceof PostgrestError 
-      ? `Database error: ${error.message} (Code: ${error.code})`
+      ? `Database error: ${(error as PostgrestError).message} (Code: ${(error as PostgrestError).code})`
       : error instanceof Error 
         ? `Application error: ${error.message}`
         : `Unknown error: ${String(error)}`
@@ -117,8 +117,8 @@ const updateTrackHandler: RequestHandler = async (req, res) => {
       message: 'Error updating track of the day',
       error: errorMessage,
       details: error instanceof PostgrestError ? {
-        code: error.code,
-        hint: error.hint
+        code: (error as PostgrestError).code,
+        hint: (error as PostgrestError).hint
       } : undefined
     })
     return 

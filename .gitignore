@@ -12,7 +12,7 @@
 .env.production.local
 
 # Build outputs
-/dist
+/server/dist
 /build
 
 # Debug logs

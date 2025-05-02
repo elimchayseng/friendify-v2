@@ -38,11 +38,11 @@ app.get('/api/getTrackOfDay', async (req, res) => {
     console.error('Error fetching track of the day:', error)
     res.status(500).json({ 
       message: 'Error fetching track of day',
-      error: error.message 
+      error: error instanceof Error ? error.message : String(error)
     })
   }
 })
 
 app.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`)
-}) 
+})
