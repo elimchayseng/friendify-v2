@@ -12,8 +12,5 @@
   "crons": [{
     "path": "/api/updateTrackOfDay",
     "schedule": "0 9 * * *"
-  }],
-  "env": {
-    "CRON_SECRET": "@cron_secret"
-  }
+  }]
 } 
