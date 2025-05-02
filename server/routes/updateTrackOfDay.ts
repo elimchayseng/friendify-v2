@@ -24,20 +24,6 @@ type ApiResponse<T> = {
   }
 }
 
-export function GET(req: Request, res: Response): ApiResponse<Track> {
-  return {
-    message: 'GET request received',
-    track: {
-      id: '123',
-      name: 'Sample Track',
-      artist: 'Sample Artist',
-      album: 'Sample Album',
-      spotify_id: 'spotify123',
-      image_url: null
-    }
-  }
-}
-
 const updateTrackHandler: RequestHandler = async (req, res) => {
   // Verify the secret token from Vercel
   const authorization = req.headers.authorization
@@ -136,6 +122,6 @@ const updateTrackHandler: RequestHandler = async (req, res) => {
   })()
 }
 
-router.post('/', updateTrackHandler)
+router.get('/', updateTrackHandler)
 
 export default router 
