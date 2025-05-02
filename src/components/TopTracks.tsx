@@ -78,41 +78,44 @@ function TopTracks({ token, userId }: { token: string | null, userId: string | n
   return (
     <div className="tracks-container">
       <h2>Everyone's Top Tracks</h2>
-      <div className="users-grid">
+      <div className="users-list">
         {sortedUserTracks.map((userTracks: UserTracks) => (
           <div key={userTracks.user.id} className="user-tracks-section">
             <h3 className="username">
               {userTracks.user.id === userId ? 'Your' : `${userTracks.user.username}'s`} Top Tracks
               {userTracks.user.id === userId && <span className="current-user-badge">You</span>}
             </h3>
-            <div className="tracks-grid">
+            <div className="tracks-list">
               {userTracks.tracks.map((track: Track) => (
-                <a 
-                  key={track.id} 
-                  className="track-tile"
-                  href={`https://open.spotify.com/track/${track.spotify_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {track.image_url ? (
-                    <img 
-                      src={track.image_url} 
-                      alt={`${track.album} cover`} 
-                      className="album-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="album-cover-placeholder">
-                      <span>🎵</span>
-                    </div>
-                  )}
-                  <div className="track-info">
-                    <span className="track-rank">#{track.rank}</span>
-                    <h4 className="track-name">{track.name}</h4>
-                    <p className="track-artist">{track.artist}</p>
-                    <p className="track-album">{track.album}</p>
+                <div key={track.id} className="track-list-item">
+                  <div className="track-rank">#{track.rank}</div>
+                  
+                  <a 
+                    href={`https://open.spotify.com/track/${track.spotify_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="track-image-link"
+                  >
+                    {track.image_url ? (
+                      <img 
+                        src={track.image_url} 
+                        alt={`${track.album} cover`} 
+                        className="album-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="album-cover-placeholder">
+                        <span>🎵</span>
+                      </div>
+                    )}
+                  </a>
+                  
+                  <div className="track-details">
+                    <div className="track-name">{track.name}</div>
+                    <div className="track-artist">{track.artist}</div>
+                    <div className="track-album">{track.album}</div>
                   </div>
-                </a>
+                </div>
               ))}
             </div>
           </div>
