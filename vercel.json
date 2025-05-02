@@ -8,5 +8,9 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "crons": [{
+    "path": "/api/updateTrackOfDay",
+    "schedule": "0 9 * * *"
+  }]
 } 
