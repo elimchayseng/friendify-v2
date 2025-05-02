@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase.js'
-import express, { Request, Response, Router, RequestHandler } from 'express'
+import express, { Router } from 'express'
+import { RequestHandler } from 'express'
 import { config } from '../config/config.js'
 import { PostgrestError } from '@supabase/supabase-js'
 
