@@ -1,16 +1,9 @@
 import express from 'express'
-import cors from 'cors'
 import updateTrackOfDayRouter from './routes/updateTrackOfDay.js'
 import { config } from './config/config.js'
 import { supabase } from './lib/supabase.js'
 
 const app = express()
-
-// Configure CORS
-app.use(cors({
-  origin: 'http://localhost:5173', // Vite's default port
-  credentials: true
-}))
 
 app.use(express.json())
 
@@ -43,6 +36,6 @@ app.get('/api/getTrackOfDay', async (req, res) => {
   }
 })
 
-app.listen(config.port, () => {
+app.listen(3000, () => {
   console.log(`Server running on port ${config.port}`)
 }) 

@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase.js'
 import express, { Request, Response, Router, RequestHandler } from 'express'
-import { config } from '../config/config.js'
 import { PostgrestError } from '@supabase/supabase-js'
 
 const router: Router = express.Router()
@@ -24,20 +23,24 @@ type ApiResponse<T> = {
   }
 }
 
+const supabaseUrl =  process.env.SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_ANON_KEY
+const cronSecret = process.env.CRON_SECRET
+
 const updateTrackHandler: RequestHandler = async (req, res) => {
   // Verify the secret token from Vercel
   const authorization = req.headers.authorization
-  if (authorization !== `Bearer ${config.cronSecret}`) {
-    console.log('Auth failed. Expected:', config.cronSecret, 'Got:', authorization)
+  if (authorization !== `Bearer ${cronSecret}`) {
+    console.log('Auth failed. Expected:', cronSecret, 'Got:', authorization)
     return res.status(401).json({ message: 'Unauthorized' })
   }
 
   return (async () => {
     try {
       console.log('Supabase Configuration:', {
-        url: config.supabaseUrl,
-        hasKey: !!config.supabaseKey,
-        keyPrefix: config.supabaseKey.slice(0, 5) + '...'
+        url: supabaseUrl,
+        hasKey: !!supabaseKey,
+        keyPrefix: supabaseKey.slice(0, 5) + '...'
       })
 
       console.log('Fetching tracks from Supabase...')

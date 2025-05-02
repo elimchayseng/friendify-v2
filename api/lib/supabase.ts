@@ -1,7 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
-import { config } from '../config/config.js'
 
-export const supabase = createClient(config.supabaseUrl, config.supabaseKey, {
+const supabaseUrl =  process.env.SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_ANON_KEY
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
@@ -10,7 +12,7 @@ export const supabase = createClient(config.supabaseUrl, config.supabaseKey, {
   global: {
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${config.supabaseKey}`
+      'Authorization': `Bearer ${supabaseKey}`
     }
   }
 }) 
