@@ -16,8 +16,8 @@ for (const envVar of requiredEnvVars) {
 }
 
 export const config = {
-  supabaseUrl: process.env.SUPABASE_URL as string,
-  supabaseKey: process.env.SUPABASE_ANON_KEY as string,
-  cronSecret: process.env.CRON_SECRET as string,
+  supabaseUrl: process.env.SUPABASE_URL || '',
+  supabaseKey: process.env.SUPABASE_ANON_KEY || '',
+  cronSecret: process.env.CRON_SECRET || '',
   port: process.env.PORT || 5001
 } 
