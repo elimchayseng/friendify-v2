@@ -95,9 +95,12 @@ function TopTracks({ token, userId }: { token: string | null, userId: string | n
     <div className="tracks-wrapper">
       <div className="tracks-container">
         <h2>Everyone's Top Tracks</h2>
-        <div className="users-list">
+        <div className="users-grid">
           {sortedUserTracks.map((userTracks: UserTracks) => (
-            <div key={userTracks.user.id} className="user-tracks-section">
+            <div 
+              key={userTracks.user.id} 
+              className={`user-tracks-section ${userTracks.user.id === userId ? 'current-user' : ''}`}
+            >
               <h3 className="username">
                 {userTracks.user.id === userId ? 'Your' : `${userTracks.user.username}'s`} Top Tracks
                 {userTracks.user.id === userId && <span className="current-user-badge">You</span>}
