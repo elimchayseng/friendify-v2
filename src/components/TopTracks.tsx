@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { getUserTracks, getAllUserTracks } from '../lib/supabase'
+import { useQuery } from '@tanstack/react-query'
+import { getAllUserTracks } from '../lib/supabase'
 import './TopTracks.css'
 
 interface Track {
