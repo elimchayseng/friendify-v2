@@ -81,7 +81,7 @@ function AppContent() {
                     </div>
                     <div className="creator-container">
                         <a href="https://www.limchayseng.com/" target="_blank" rel="noopener noreferrer" className="footer-link">
-                            <span className="creator-text">by Ethan</span>
+                            <span className="creator-text">by Ethan and Tres ❤️</span>
                         </a>
                         <img src="/images/skull-ethan-logo.png" alt="Ethan's skull logo" className="creator-logo" />
                     </div>
