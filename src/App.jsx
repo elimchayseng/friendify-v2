@@ -1,6 +1,7 @@
 import { useState, useEffect, Component } from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import TopTracks from './components/TopTracks.tsx'
+import TrackOfDay from './components/TrackOfDay'
 import { createOrUpdateUser, saveUserTracks, getAllUserTracks } from './lib/supabase'
 import './App.css'
 
@@ -323,17 +324,8 @@ function AppContent() {
         </div>
       )}
       <main>
-        {isLoading ? (
-          <div>Connecting to Spotify...</div>
-        ) : token ? (
-          <ErrorBoundary>
-            <TopTracks token={token} userId={userId} />
-          </ErrorBoundary>
-        ) : (
-          <div className="landing-message">
-            <p>✨ Please connect with Spotify to see everyone's top tracks ✨</p>
-          </div>
-        )}
+        <TrackOfDay />
+        <TopTracks />
       </main>
     </div>
   )
