@@ -22,22 +22,22 @@ A modern web application that provides daily song recommendations based on your 
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/daily-friend-songs.git
-cd daily-friend-songs
-```
-
-2. Install dependencies:
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
+2. Set up environment variables:
    * Copy `.env.example` to `.env.local`
    * Fill in your Spotify and Supabase credentials
 
-4. Start the development server:
+2. Start supabase locally
+
+```bash
+supabase start
+```
+
+3. Start the development server:
 ```bash
 npm run dev
 ```
@@ -77,15 +77,17 @@ daily-friend-songs/
 Required environment variables:
 
 ```env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_key
+VITE_SPOTIFY_CLIENT_ID
+VITE_REDIRECT_URI
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
 ```
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-1. Fork the project
+1. Pull the project
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
