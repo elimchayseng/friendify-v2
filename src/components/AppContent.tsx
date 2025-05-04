@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import TopTracks from './TopTracks'
 import TrackOfDay from './TrackOfDay'
@@ -6,6 +6,7 @@ import ChatReview from './ChatReview'
 import { ErrorBoundary } from './ErrorBoundary'
 import { handleSpotifyLogin, handleSpotifyLogout, exchangeCodeForToken } from '../lib/auth'
 import { getAllUserTracks } from '../lib/supabase'
+import useSyncHeight from '../hooks/useSyncHeight'
 
 function AppContent() {
     const [token, setToken] = useState<string | null>(() => localStorage.getItem('spotify_token') || null)
@@ -13,6 +14,17 @@ function AppContent() {
     const [userId, setUserId] = useState<string | null>(() => localStorage.getItem('user_id') || null)
     const [isLoading, setIsLoading] = useState(false)
     const queryClient = useQueryClient()
+    
+    // Refs for height synchronization
+    const trackOfDayRef = useRef<HTMLDivElement>(null);
+    const chatReviewRef = useRef<HTMLDivElement>(null);
+    
+    // Sync heights between TrackOfDay and ChatReview components
+    useSyncHeight(
+        [trackOfDayRef, chatReviewRef], 
+        { exactHeight: true, minHeight: false }, 
+        [token]
+    );
 
     useEffect(() => {
         const validateStoredToken = async () => {
@@ -112,8 +124,8 @@ function AppContent() {
                 ) : token ? (
                     <ErrorBoundary>
                         <div className="track-review-container">
-                            <TrackOfDay />
-                            <ChatReview />
+                            <TrackOfDay ref={trackOfDayRef} />
+                            <ChatReview ref={chatReviewRef} />
                         </div>
                         <TopTracks token={token} userId={userId} />
                     </ErrorBoundary>

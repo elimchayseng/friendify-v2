@@ -20,8 +20,9 @@
   flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
-  align-items: flex-start;
+  align-items: stretch;
   margin-bottom: 2rem;
+  min-height: 600px;
 }
 
 @media (min-width: 850px) {
