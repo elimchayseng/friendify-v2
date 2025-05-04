@@ -1,16 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './ChatReview.css';
 
 interface Review {
   id: number;
   text: string;
   timestamp: Date;
+  username: string;
 }
 
 export default function ChatReview() {
   const [reviewText, setReviewText] = useState<string>('');
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [username, setUsername] = useState<string>('');
   const maxChars = 100;
+
+  // Get username from localStorage on component mount
+  useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
+    setUsername(storedUsername || 'Anonymous User');
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +27,8 @@ export default function ChatReview() {
     const newReview: Review = {
       id: Date.now(),
       text: reviewText.trim(),
-      timestamp: new Date()
+      timestamp: new Date(),
+      username: username
     };
 
     setReviews([newReview, ...reviews]);
@@ -30,14 +39,21 @@ export default function ChatReview() {
     <div className="chat-review-container">
       <h2>Track Reviews</h2>
       
+      <div className="username-display">
+        <span className="current-username">@{username}</span>
+      </div>
+      
       <div className="reviews-list">
         {reviews.length > 0 ? (
           reviews.map(review => (
             <div key={review.id} className="review-item">
+              <div className="review-header">
+                <span className="review-username">@{review.username}</span>
+                <span className="review-time">
+                  {review.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
               <p className="review-text">{review.text}</p>
-              <span className="review-time">
-                {review.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
             </div>
           ))
         ) : (
