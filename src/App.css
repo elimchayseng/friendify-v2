@@ -15,6 +15,21 @@
   color: #ffffff;
 }
 
+.track-review-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 850px) {
+  .track-review-container {
+    flex-wrap: nowrap;
+  }
+}
+
 header {
   display: flex;
   justify-content: space-between;

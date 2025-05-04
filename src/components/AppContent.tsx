@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import TopTracks from './TopTracks'
 import TrackOfDay from './TrackOfDay'
+import ChatReview from './ChatReview'
 import { ErrorBoundary } from './ErrorBoundary'
 import { handleSpotifyLogin, handleSpotifyLogout, exchangeCodeForToken } from '../lib/auth'
 import { getAllUserTracks } from '../lib/supabase'
@@ -110,7 +111,10 @@ function AppContent() {
                     <div>Connecting to Spotify...</div>
                 ) : token ? (
                     <ErrorBoundary>
-                        <TrackOfDay />
+                        <div className="track-review-container">
+                            <TrackOfDay />
+                            <ChatReview />
+                        </div>
                         <TopTracks token={token} userId={userId} />
                     </ErrorBoundary>
                 ) : (
