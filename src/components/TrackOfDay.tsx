@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useRef, forwardRef } from 'react'
 import { supabase } from '../lib/supabase'
 import './TrackOfDay.css'
 
@@ -16,7 +17,7 @@ interface Track {
   }[]
 }
 
-export default function TrackOfDay() {
+const TrackOfDay = forwardRef<HTMLDivElement>((props, ref) => {
   const { data: trackOfDay, isLoading, error } = useQuery<Track>({
     queryKey: ['trackOfDay'],
     queryFn: async () => {
@@ -48,7 +49,7 @@ export default function TrackOfDay() {
 
   if (isLoading) {
     return (
-      <div className="track-of-day-container">
+      <div className="track-of-day-container" ref={ref}>
         <h2>Track of the Day</h2>
         <p className="loading">Loading...</p>
       </div>
@@ -57,7 +58,7 @@ export default function TrackOfDay() {
 
   if (error) {
     return (
-      <div className="track-of-day-container">
+      <div className="track-of-day-container" ref={ref}>
         <h2>Track of the Day</h2>
         <p className="error">Failed to load track of the day</p>
       </div>
@@ -66,7 +67,7 @@ export default function TrackOfDay() {
 
   if (!trackOfDay) {
     return (
-      <div className="track-of-day-container">
+      <div className="track-of-day-container" ref={ref}>
         <h2>Track of the Day</h2>
         <p>No track selected for today</p>
       </div>
@@ -76,7 +77,7 @@ export default function TrackOfDay() {
   const username = trackOfDay.user_tracks?.[0]?.users?.username || 'Unknown User'
 
   return (
-    <div className="track-of-day-container">
+    <div className="track-of-day-container" ref={ref}>
       <h2>Track of the Day - brought to you by {username}</h2>
       <div 
         className="track-of-day"
@@ -106,4 +107,6 @@ export default function TrackOfDay() {
       </div>
     </div>
   )
-} 
+})
+
+export default TrackOfDay 

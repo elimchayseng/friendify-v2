@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, forwardRef } from 'react';
 import './ChatReview.css';
 
 interface Review {
@@ -8,7 +8,7 @@ interface Review {
   username: string;
 }
 
-export default function ChatReview() {
+const ChatReview = forwardRef<HTMLDivElement>((props, ref) => {
   const [reviewText, setReviewText] = useState<string>('');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [username, setUsername] = useState<string>('');
@@ -36,7 +36,7 @@ export default function ChatReview() {
   };
 
   return (
-    <div className="chat-review-container">
+    <div className="chat-review-container" ref={ref}>
       <h2>Track Reviews</h2>
       
       <div className="username-display">
@@ -85,4 +85,6 @@ export default function ChatReview() {
       </form>
     </div>
   );
-} 
+});
+
+export default ChatReview; 
