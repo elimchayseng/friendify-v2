@@ -77,7 +77,7 @@ export default function TrackOfDay() {
 
   return (
     <div className="track-of-day-container">
-      <h2>Track of the Day - brought to you by {username}</h2>
+      <h2>Track of the Day</h2>
       <div 
         className="track-of-day"
         onClick={() => handleTrackClick(trackOfDay.spotify_id)}
@@ -103,7 +103,8 @@ export default function TrackOfDay() {
             <p className="album">{trackOfDay.album}</p>
           </div>
         </div>
-      </div>
+          </div>
+          <h3> Brought to you by {username}</h3>
     </div>
   )
 } 
