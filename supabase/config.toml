@@ -256,6 +256,7 @@ skip_nonce_check = false
 enabled = true
 client_id = "env(SPOTIFY_CLIENT_ID)"
 secret = "env(SPOTIFY_CLIENT_SECRET)"
+redirect_uri = "http://localhost:54321/auth/v1/callback"
 
 
 # Use Firebase Auth as a third-party provider alongside Supabase Auth.

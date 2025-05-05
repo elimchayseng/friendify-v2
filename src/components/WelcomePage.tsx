@@ -46,7 +46,7 @@ function WelcomePage() {
             onClick={handleSpotifyLogin}
             disabled={isLoggingIn}
           >
-            <img src="/spotify-icon.svg" alt="Spotify" className="spotify-icon" />
+            <img src="/spotify-logo.png" alt="Spotify" className="spotify-icon" />
             {isLoggingIn ? 'Connecting...' : 'Log in with Spotify'}
           </button>
 

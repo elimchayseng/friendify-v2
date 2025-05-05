@@ -54,7 +54,6 @@ h1 {
 }
 
 button {
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -199,9 +198,6 @@ main {
     text-align: center;
   }
   
-  .spotify-link-button {
-    margin: 1rem 0 0 0;
-  }
   
   .tracks-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -278,10 +274,7 @@ main {
     padding: 0.5rem;
   }
   
-  .spotify-link-button {
-    padding: 10px 16px;
-    font-size: 0.9rem;
-  }
+
 }
 
 .logo {
@@ -432,23 +425,6 @@ main {
   margin-bottom: 1.5rem;
 }
 
-.spotify-link-button {
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-  color: white;
-  text-decoration: none;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  display: inline-block;
-  margin-left: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.spotify-link-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
 
 .spotify-link {
   display: flex;
