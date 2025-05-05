@@ -171,13 +171,28 @@ main {
     padding: 1rem;
   }
   
+  .app-container {
+    padding: 1rem;
+  }
+  
+  header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
   header h1 {
     font-size: 2rem;
+  }
+  
+  header button {
+    margin-left: 0;
   }
   
   .featured-track {
     flex-direction: column;
     text-align: center;
+    gap: 1rem;
   }
   
   .featured-track-info {
@@ -190,6 +205,82 @@ main {
   
   .tracks-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  
+  .profiles-container {
+    padding: 10px;
+  }
+  
+  .profile-switcher {
+    padding-bottom: 15px;
+  }
+  
+  .profile-button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .profile-name {
+    font-size: 2rem;
+  }
+  
+  .track-of-the-day h3 {
+    font-size: 1.6rem;
+  }
+  
+  .featured-track-info h4 {
+    font-size: 1.5rem;
+  }
+  
+  .featured-track-info p {
+    font-size: 1rem;
+  }
+  
+  .app-footer {
+    padding: 1.5rem 1rem;
+  }
+  
+  .footer-text-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #root {
+    padding: 0.5rem;
+  }
+  
+  .app-container {
+    padding: 0.5rem;
+  }
+  
+  header {
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  
+  .track-of-the-day {
+    padding: 1.5rem 1rem;
+  }
+  
+  .profile-name {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .tracks-container {
+    padding: 1rem;
+  }
+  
+  .tracks-grid {
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+  
+  .spotify-link-button {
+    padding: 10px 16px;
+    font-size: 0.9rem;
   }
 }
 
@@ -231,7 +322,8 @@ main {
 
 .profiles-container {
   padding: 20px;
-  max-width: 1200px;
+  max-width: 100%;
+  width: 1200px;
   margin: 0 auto;
 }
 
@@ -241,6 +333,8 @@ main {
   margin-bottom: 20px;
   overflow-x: auto;
   padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 
 .profile-button {
@@ -308,8 +402,10 @@ main {
 }
 
 .featured-track-image {
-  width: 250px;
-  height: 250px;
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  aspect-ratio: 1/1;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease;
@@ -470,7 +566,7 @@ main {
 }
 
 .metallic-text {
-  font-size: 4rem;
+  font-size: clamp(2rem, 5vw, 4rem);
   font-weight: 700;
   position: relative;
   background: linear-gradient(
