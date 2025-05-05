@@ -6,7 +6,8 @@
   margin: 20px auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  max-width: 400px;
+  max-width: 90%;
+  width: 400px;
 }
 
 .track-of-day-container h2 {
@@ -48,8 +49,10 @@
 }
 
 .track-image {
-  width: 250px;
-  height: 250px;
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  aspect-ratio: 1/1;
   border-radius: 12px;
   object-fit: cover;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -91,4 +94,47 @@
   text-align: center;
   font-size: 1.2rem;
   padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .track-of-day-container {
+    padding: 20px;
+    margin: 15px auto;
+  }
+  
+  .track-of-day-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .track-content {
+    gap: 15px;
+  }
+  
+  .track-name {
+    font-size: 1.2rem;
+  }
+  
+  .track-info .artist {
+    font-size: 1rem;
+  }
+  
+  .track-info .album {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .track-of-day-container {
+    padding: 15px;
+    width: auto;
+  }
+  
+  .track-of-day {
+    padding: 15px;
+  }
+  
+  .track-image {
+    max-width: 200px;
+  }
 } 
