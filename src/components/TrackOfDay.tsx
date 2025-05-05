@@ -50,7 +50,9 @@ const TrackOfDay = forwardRef<HTMLDivElement>((props, ref) => {
   if (isLoading) {
     return (
       <div className="track-of-day-container" ref={ref}>
-        <h2>Track of the Day</h2>
+        <div className="track-header">
+          <h2>Track of the Day</h2>
+        </div>
         <p className="loading">Loading...</p>
       </div>
     )
@@ -59,7 +61,9 @@ const TrackOfDay = forwardRef<HTMLDivElement>((props, ref) => {
   if (error) {
     return (
       <div className="track-of-day-container" ref={ref}>
-        <h2>Track of the Day</h2>
+        <div className="track-header">
+          <h2>Track of the Day</h2>
+        </div>
         <p className="error">Failed to load track of the day</p>
       </div>
     )
@@ -68,7 +72,9 @@ const TrackOfDay = forwardRef<HTMLDivElement>((props, ref) => {
   if (!trackOfDay) {
     return (
       <div className="track-of-day-container" ref={ref}>
-        <h2>Track of the Day</h2>
+        <div className="track-header">
+          <h2>Track of the Day</h2>
+        </div>
         <p>No track selected for today</p>
       </div>
     )
@@ -78,7 +84,12 @@ const TrackOfDay = forwardRef<HTMLDivElement>((props, ref) => {
 
   return (
     <div className="track-of-day-container" ref={ref}>
-      <h2>Track of the Day - brought to you by {username}</h2>
+      <div className="track-header">
+        <h2>Track of the Day</h2>
+        <div className="track-provider">
+          <span className="from-text">From</span><span className="username">{username}</span>
+        </div>
+      </div>
       <div 
         className="track-of-day"
         onClick={() => handleTrackClick(trackOfDay.spotify_id)}

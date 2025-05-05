@@ -13,14 +13,19 @@
 }
 
 .track-of-day-container h2 {
-  color: #fff;
   font-size: 1.8rem;
-  margin-bottom: 25px;
+  margin-bottom: 5px;
   text-align: center;
   background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-wrap: break-word;
 }
 
 .track-of-day {
@@ -34,6 +39,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  overflow: hidden;
+  margin-top: 5px;
 }
 
 .track-of-day:hover, .track-of-day:focus {
@@ -52,6 +59,7 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  width: 100%;
 }
 
 .track-image {
@@ -70,6 +78,8 @@
 .track-info {
   text-align: center;
   width: 100%;
+  padding: 0 5px;
+  overflow: hidden;
 }
 
 .track-name {
@@ -78,6 +88,13 @@
   margin: 0 0 10px 0;
   font-weight: 600;
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-wrap: break-word;
+  max-width: 100%;
 }
 
 .track-info .artist {
@@ -85,12 +102,20 @@
   font-size: 1.2rem;
   margin: 0 0 8px 0;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .track-info .album {
   color: rgba(255, 255, 255, 0.7);
   font-size: 1rem;
   font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .loading, .error {
@@ -102,4 +127,35 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Styles for track provider section */
+.track-header {
+  margin-bottom: 15px;
+  width: 100%;
+  text-align: center;
+}
+
+.track-provider {
+  text-align: center;
+  width: 100%;
+  margin-top: 0;
+  line-height: 1.2;
+}
+
+.from-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+  font-size: 1.1rem;
+  margin-right: 5px;
+  display: inline;
+}
+
+.username {
+  background: linear-gradient(45deg, #4ecdc4, #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: inline;
 } 
