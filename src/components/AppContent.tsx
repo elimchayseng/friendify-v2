@@ -86,10 +86,10 @@ function AppContent() {
                 ) : (
                     <ErrorBoundary>
                         <div className="track-review-container">
-                            <div className="track-component">
+                            <div style={{ width: '450px', maxWidth: '45%' }}>
                                 <TrackOfDay />
                             </div>
-                            <div className="chat-component">
+                            <div style={{ width: '450px', maxWidth: '45%' }}>
                                 <ChatReview />
                             </div>
                         </div>

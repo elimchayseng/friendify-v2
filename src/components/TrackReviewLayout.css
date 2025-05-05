@@ -8,14 +8,6 @@
   max-width: 1000px;
 }
 
-/* Component containers */
-.track-component,
-.chat-component {
-  flex: 1;
-  max-width: 450px;
-  width: 100%;
-}
-
 /* Allow individual containers to keep their original styling */
 .track-review-container > * {
   flex: 1;
@@ -27,15 +19,10 @@
   .track-review-container {
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-    width: 100%;
   }
   
-  .track-review-container > *,
-  .track-component,
-  .chat-component {
-    width: 95% !important;
-    max-width: 100% !important;
-    margin-bottom: 15px;
+  .track-review-container > * {
+    width: 100%;
+    max-width: 450px;
   }
 } 
