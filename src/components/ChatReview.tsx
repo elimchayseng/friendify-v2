@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, forwardRef } from 'react';
 import './ChatReview.css';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabase';
 
 interface Review {
   id: number;
@@ -15,7 +15,7 @@ const ChatReview = forwardRef<HTMLDivElement>((props, ref) => {
   const [username, setUsername] = useState<string>('');
   const maxChars = 100;
 
-  // Get username from localStorage on component mount
+  // Get username from Supabase on component mount
   useEffect(() => {
     const getUsername = async () => {
       try {
