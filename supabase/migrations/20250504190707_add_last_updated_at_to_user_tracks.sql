@@ -1,0 +1,2 @@
+ALTER TABLE "public"."user_tracks"
+ADD COLUMN "last_updated_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
