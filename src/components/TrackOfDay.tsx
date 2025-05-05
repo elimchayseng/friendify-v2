@@ -23,15 +23,15 @@ export default function TrackOfDay() {
       const { data, error } = await supabase
         .from('tracks')
         .select(`
-          *,
-          user_tracks!inner (
-            users!inner (
-              username
+            *,
+            user_tracks!inner (
+              users!inner (
+                username
+              )
             )
-          )
-        `)
+          `)
         .eq('is_track_of_day', true)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       console.log('Track of day data:', data)

@@ -12,49 +12,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    flowType: 'pkce'
   }
 })
 
-export async function createOrUpdateUser(username: string, spotifyId: string) {
-  // First check if user exists
-  const { data: existingUser, error: fetchError } = await supabase
-    .from('users')
-    .select()
-    .eq('spotify_id', spotifyId)
-    .single()
 
-  if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-    throw fetchError
-  }
-
-  if (existingUser) {
-    // Update existing user
-    const { data, error } = await supabase
-      .from('users')
-      .update({ username })
-      .eq('id', existingUser.id)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } else {
-    // Create new user
-    const { data, error } = await supabase
-      .from('users')
-      .insert({
-        username,
-        spotify_id: spotifyId,
-      })
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  }
-}
-
+  
 export async function saveTrack(track: SpotifyApi.TrackObjectFull) {
   try {
     // First check if track exists
@@ -308,7 +272,7 @@ export async function getUserTracks(userId: string): Promise<Track[]> {
     return transformedTracks;
   } catch (error) {
     console.error('Error in getUserTracks:', error);
-    throw error;
+    throw error
   }
 }
 
@@ -321,4 +285,15 @@ export async function getTrackOfDay() {
 
   if (error) throw error
   return data
-} 
+}
+
+
+
+export async function getAllUsers() {
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, username, spotify_id, access_token, refresh_token, token_expires_at')
+  
+  if (error) throw error
+  return data || []
+}

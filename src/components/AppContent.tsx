@@ -3,73 +3,50 @@ import { useQueryClient } from '@tanstack/react-query'
 import TopTracks from './TopTracks'
 import TrackOfDay from './TrackOfDay'
 import { ErrorBoundary } from './ErrorBoundary'
-import { handleSpotifyLogin, handleSpotifyLogout, exchangeCodeForToken } from '../lib/auth'
-import { getAllUserTracks } from '../lib/supabase'
+import { handleSpotifyLogout } from '../lib/auth'
+import { getAllUserTracks, supabase } from '../lib/supabase'
 
 function AppContent() {
-    const [token, setToken] = useState<string | null>(() => localStorage.getItem('spotify_token') || null)
     const [error, setError] = useState<string | null>(null)
-    const [userId, setUserId] = useState<string | null>(() => localStorage.getItem('user_id') || null)
     const [isLoading, setIsLoading] = useState(false)
+    const [userId, setUserId] = useState<string | null>(null)
     const queryClient = useQueryClient()
 
     useEffect(() => {
-        const validateStoredToken = async () => {
-            const storedToken = localStorage.getItem('spotify_token')
-            if (!storedToken) return
-
+        const fetchUserData = async () => {
             try {
-                const response = await fetch('https://api.spotify.com/v1/me', {
-                    headers: { 'Authorization': `Bearer ${storedToken}` }
-                })
-
-                if (!response.ok) {
-                    handleSpotifyLogout(queryClient)
-                }
-            } catch (error) {
-                console.error('Error validating token:', error)
-                handleSpotifyLogout(queryClient)
-            }
-        }
-
-        validateStoredToken()
-    }, [queryClient])
-
-    useEffect(() => {
-        const storedUserId = localStorage.getItem('user_id')
-        const storedUsername = localStorage.getItem('username')
-
-        if (storedUserId && storedUsername) {
-            setUserId(storedUserId)
-            queryClient.prefetchQuery({
-                queryKey: ['all-user-tracks'],
-                queryFn: getAllUserTracks,
-            })
-        }
-    }, [queryClient])
-
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search)
-        const code = urlParams.get('code')
-
-        if (code) {
-            setIsLoading(true)
-            const verifier = localStorage.getItem('verifier')
-            window.history.replaceState({}, document.title, "/")
-
-            if (!verifier) {
-                setError('No verifier found in localStorage. Please try logging in again.')
-                setIsLoading(false)
-                return
-            }
-
-            exchangeCodeForToken(code, verifier, setToken, setUserId, setError, queryClient)
-                .catch(() => {}) // Error is already handled in exchangeCodeForToken
-                .finally(() => {
-                    localStorage.removeItem('verifier')
+                setIsLoading(true)
+                
+                // Get current session
+                const { data: { session } } = await supabase.auth.getSession()
+                
+                if (!session) {
+                    console.log('No active session found')
                     setIsLoading(false)
-                })
+                    return
+                }
+                
+                // Get user data from Supabase
+                const { data: user } = await supabase
+                    .from('users')
+                    .select('id, username, spotify_id')
+                    .eq('spotify_id', session.user.user_metadata.provider_id)
+                    .single()
+                
+                if (user) {
+                    setUserId(user.id)
+                } else {
+                    console.log('No user found in database')
+                }
+            } catch (err) {
+                console.error('Error fetching user data:', err)
+                setError('Failed to load user data. Please try logging in again.')
+            } finally {
+                setIsLoading(false)
+            }
         }
+        
+        fetchUserData()
     }, [queryClient])
 
     return (
@@ -86,17 +63,12 @@ function AppContent() {
                         <img src="/images/skull-ethan-logo.png" alt="Ethan's skull logo" className="creator-logo" />
                     </div>
                 </div>
-                {!token && !isLoading && (
-                    <button onClick={() => handleSpotifyLogin(setError)}>
-                        Connect with Spotify
-                    </button>
-                )}
-                {token && (
-                    <button onClick={() => {
-                        handleSpotifyLogout(queryClient);
-                        setToken(null);
+                { (
+                    <button onClick={async () => {
+                        await handleSpotifyLogout(queryClient);
                         setUserId(null);
                         setError(null);
+                        window.location.href = '/';
                     }}>Logout</button>
                 )}
             </header>
@@ -108,16 +80,12 @@ function AppContent() {
             <main>
                 {isLoading ? (
                     <div>Connecting to Spotify...</div>
-                ) : token ? (
+                ) : (
                     <ErrorBoundary>
                         <TrackOfDay />
-                        <TopTracks token={token} userId={userId} />
+                        <TopTracks userId={userId} />
                     </ErrorBoundary>
-                ) : (
-                    <div className="landing-message">
-                        <p>✨ Please connect with Spotify to see everyone's top tracks ✨</p>
-                    </div>
-                )}
+                ) }
             </main>
         </div>
     )

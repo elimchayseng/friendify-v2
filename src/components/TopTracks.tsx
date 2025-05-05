@@ -21,7 +21,7 @@ interface UserTracks {
   tracks: Track[]
 }
 
-function TopTracks({ token, userId }: { token: string | null, userId: string | null }) {
+function TopTracks({ userId }: { userId: string | null }) {
   const [isLoading, setIsLoading] = useState(true)
 
   const { data: allUserTracks, error, isLoading: queryLoading } = useQuery<UserTracks[]>({
@@ -30,7 +30,6 @@ function TopTracks({ token, userId }: { token: string | null, userId: string | n
     staleTime: 300000, // 5 minutes
     gcTime: 1800000, // 30 minutes
     retry: 2,
-    enabled: Boolean(token || localStorage.getItem('spotify_token')) // Only fetch when authenticated
   })
 
   useEffect(() => {
@@ -39,18 +38,7 @@ function TopTracks({ token, userId }: { token: string | null, userId: string | n
     }
   }, [queryLoading])
 
-  // Show login message if no authentication
-  if (!token && !localStorage.getItem('spotify_token')) {
-    return (
-      <div className="tracks-wrapper">
-        <div className="tracks-container">
-          <div className="login-message">
-            Please connect with Spotify to see everyone's top tracks
-          </div>
-        </div>
-      </div>
-    )
-  }
+
 
   if (error) {
     return (

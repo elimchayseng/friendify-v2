@@ -16,6 +16,9 @@ export interface Database {
           spotify_id: string
           created_at: string
           current_track_id: string | null
+          access_token: string | null
+          refresh_token: string | null
+          token_expires_at: string | null
         }
         Insert: {
           id?: string
@@ -23,6 +26,9 @@ export interface Database {
           spotify_id: string
           created_at?: string
           current_track_id?: string | null
+          access_token?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
         }
       }
       tracks: {

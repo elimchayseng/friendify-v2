@@ -1,0 +1,90 @@
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: #121212;
+}
+
+.welcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-grow: 1;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.welcome-content h1 {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.welcome-content p {
+  font-size: 1.25rem;
+  margin-bottom: 3rem;
+  color: #a8a8a8;
+}
+
+.spotify-login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1DB954;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 14px 35px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-bottom: 2rem;
+}
+
+.spotify-login-button:hover {
+  background-color: #1ed760;
+  transform: scale(1.05);
+}
+
+.spotify-login-button:active {
+  transform: scale(0.98);
+}
+
+.spotify-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+.creator-info {
+  display: flex;
+  align-items: center;
+  margin-top: 3rem;
+  font-size: 0.9rem;
+  color: #a8a8a8;
+}
+
+.creator-text {
+  margin-right: 8px;
+}
+
+.creator-logo {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 768px) {
+  .welcome-content h1 {
+    font-size: 3rem;
+  }
+  
+  .welcome-content p {
+    font-size: 1.1rem;
+  }
+}
