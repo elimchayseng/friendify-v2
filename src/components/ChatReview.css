@@ -10,6 +10,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 550px;
 }
 
 .chat-review-container h2 {
@@ -97,6 +98,7 @@
   display: flex;
   gap: 10px;
   margin-top: auto;
+  width: 100%;
 }
 
 .input-container {
@@ -170,4 +172,39 @@
 
 .reviews-list::-webkit-scrollbar-thumb:hover {
   background: rgba(78, 205, 196, 0.7);
+}
+
+/* Add responsive styles for mobile devices */
+@media (max-width: 768px) {
+  .chat-review-container {
+    padding: 15px;
+    max-width: 100%;
+    min-height: 400px;
+  }
+  
+  .reviews-list {
+    min-height: 200px;
+    max-height: 300px;
+  }
+  
+  .review-form {
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .input-container {
+    width: 100%;
+    flex-basis: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .submit-btn {
+    margin-left: auto;
+    padding: 10px 15px;
+  }
+  
+  .review-input {
+    padding: 10px 40px 10px 15px;
+    font-size: 16px; /* Prevent zoom on mobile */
+  }
 } 
