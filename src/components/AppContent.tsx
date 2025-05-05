@@ -64,7 +64,8 @@ function AppContent() {
                     </div>
                 </div>
                 { (
-                    <button onClick={async () => {
+                    <button className="spotify-logout-button"
+                        onClick={async () => {
                         await handleSpotifyLogout(queryClient);
                         setUserId(null);
                         setError(null);
