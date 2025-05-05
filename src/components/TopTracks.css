@@ -12,23 +12,36 @@ html, body, #root {
   color: white;
 }
 
+/* Wrapper to center the content */
+.tracks-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background-color: #0a0a0a;
+}
+
 /* Main container */
 .tracks-container {
   flex: 1;
   width: 100%;
-  max-width: 90%;
-  min-width: 1200px;
+  max-width: 1200px; /* Increased width to accommodate 3 users per row */
   margin: 0 auto;
-  padding: 40px;
+  padding: 40px 20px;
   display: flex;
   flex-direction: column;
   background-color: #0a0a0a;
 }
 
+.tracks-container h2 {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* Users grid container - Updated to grid layout */
 .users-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 users per row */
+  gap: 20px;
   width: 100%;
   padding: 0;
   background-color: transparent;
@@ -37,26 +50,55 @@ html, body, #root {
 .user-tracks-section {
   width: 100%;
   background-color: rgba(18, 18, 18, 0.95);
-  border-radius: 16px;
-  padding: 32px;
+  border-radius: 12px;
+  padding: 16px; /* Reduced padding */
   margin: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.user-tracks-section:first-child {
+.user-tracks-section:nth-child(3n+1) {
+  background-color: rgba(29, 185, 84, 0.02);
+  border: 1px solid rgba(29, 185, 84, 0.1);
+}
+
+/* Highlight only the current user's section */
+.user-tracks-section.current-user {
   background-color: rgba(29, 185, 84, 0.05);
   border: 1px solid rgba(29, 185, 84, 0.2);
   box-shadow: 0 4px 15px rgba(29, 185, 84, 0.1);
 }
 
-.tracks-grid {
+/* Tracks list - Updated for compact layout */
+.tracks-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px; /* Reduced gap */
   width: 100%;
-  margin-top: 24px;
+  margin-top: 12px; /* Reduced margin */
   background-color: transparent;
+  flex: 1;
+}
+
+/* Track list item - new style for list items */
+.track-list-item {
+  width: 100%;
+  background-color: rgba(24, 24, 24, 0.95);
+  border-radius: 8px; /* Smaller radius */
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding-right: 8px; /* Reduced padding */
+}
+
+.track-list-item:hover {
+  background-color: rgba(29, 185, 84, 0.1);
+  border: 1px solid rgba(29, 185, 84, 0.2);
 }
 
 /* Message containers should also fill available space */
@@ -80,96 +122,88 @@ html, body, #root {
 
 .username {
   color: #1DB954;
-  margin: 0 0 16px 0;
-  font-size: 1.2rem;
+  margin: 0 0 10px 0; /* Reduced margin */
+  font-size: 1rem; /* Smaller font */
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  min-height: 28px;
 }
 
 .current-user-badge {
   background: #1DB954;
   color: black;
-  font-size: 0.8rem;
-  padding: 4px 8px;
-  border-radius: 12px;
+  font-size: 0.7rem; /* Smaller font */
+  padding: 2px 6px; /* Reduced padding */
+  border-radius: 8px;
   font-weight: bold;
 }
 
-.track-tile {
-  width: 100%;
-  height: 100px;
-  background-color: rgba(24, 24, 24, 0.95);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* Album image styles */
+.track-image-link {
+  display: block;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
 }
 
-.track-tile:hover {
-  transform: translateX(5px);
-  background-color: rgba(29, 185, 84, 0.1);
-  border: 1px solid rgba(29, 185, 84, 0.2);
-  box-shadow: -5px 0 15px rgba(29, 185, 84, 0.1);
+.track-image-link:hover {
+  transform: scale(1.05);
 }
 
 .album-cover, .album-cover-placeholder {
-  width: 100px;
-  height: 100px;
-  flex-shrink: 0;
+  width: 50px; /* Smaller images */
+  height: 50px; /* Smaller images */
   object-fit: cover;
   background-color: rgba(0, 0, 0, 0.3);
 }
 
-.album-cover-placeholder span {
-  font-size: 48px;
+.album-cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.track-info {
+.album-cover-placeholder span {
+  font-size: 22px; /* Smaller icon */
+}
+
+/* Track rank - new position for list view */
+.track-rank {
+  width: 28px; /* Smaller size */
+  height: 28px; /* Smaller size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1DB954;
+  color: black;
+  font-weight: bold;
+  font-size: 0.8rem; /* Smaller font */
+  flex-shrink: 0;
+  margin: 0 8px 0 6px; /* Adjusted margins */
+  border-radius: 4px; /* Added radius for softer look */
+}
+
+/* Track details container - new style for list items */
+.track-details {
   flex: 1;
-  padding: 20px 24px;
-  background-color: transparent;
+  padding: 8px 6px; /* Reduced padding */
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px; /* Reduced gap */
   min-width: 0;
+  max-width: 100%;
 }
 
 .track-name {
-  margin: 0;
-  font-size: 1.2rem;
+  font-size: 0.9rem; /* Smaller font */
   font-weight: 600;
   color: white;
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .track-artist, .track-album {
-  margin: 0;
-  font-size: 1rem;
+  font-size: 0.8rem; /* Smaller font */
   color: rgba(255, 255, 255, 0.7);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.track-rank {
-  position: absolute;
-  left: 8px;
-  top: 8px;
-  background: #1DB954;
-  color: black;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  z-index: 1;
 }
 
 /* Loading state styles */
@@ -186,30 +220,33 @@ html, body, #root {
 }
 
 /* Add responsive breakpoints */
-@media (max-width: 1400px) {
-  .tracks-container {
-    max-width: 95%;
-    min-width: 1000px;
-  }
-}
-
 @media (max-width: 1200px) {
   .tracks-container {
-    max-width: 100%;
-    min-width: 800px;
+    max-width: 95%;
     padding: 20px;
   }
   
+  .users-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 users per row on medium screens */
+  }
+}
+
+@media (max-width: 900px) {
+  .tracks-container {
+    padding: 15px;
+  }
+  
   .user-tracks-section {
-    padding: 24px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 700px) {
+  .users-grid {
+    grid-template-columns: 1fr; /* 1 user per row on small screens */
   }
   
-  .track-tile {
-    height: 80px;
-  }
-  
-  .album-cover, .album-cover-placeholder {
-    width: 80px;
-    height: 80px;
+  .tracks-container {
+    width: 95%;
   }
 } 
