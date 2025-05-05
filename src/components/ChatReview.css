@@ -1,0 +1,173 @@
+.chat-review-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-review-container h2 {
+  color: #fff;
+  font-size: 1.6rem;
+  margin-bottom: 15px;
+  text-align: center;
+  background: linear-gradient(45deg, #4ecdc4, #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.username-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  padding: 5px 0;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+}
+
+.current-username {
+  color: #4ecdc4;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.reviews-list {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  max-height: none;
+  min-height: 250px;
+  overflow-y: auto;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.review-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-left: 3px solid #4ecdc4;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.review-username {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #4ecdc4;
+}
+
+.review-time {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem;
+}
+
+.review-text {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  word-break: break-word;
+  font-size: 0.95rem;
+}
+
+.no-reviews {
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  font-style: italic;
+  padding: 20px 0;
+  margin: auto;
+}
+
+.review-form {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.input-container {
+  position: relative;
+  flex-grow: 1;
+}
+
+.review-input {
+  width: 100%;
+  padding: 12px 40px 12px 15px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.review-input:focus {
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.2);
+}
+
+.char-count {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem;
+}
+
+.submit-btn {
+  background: linear-gradient(45deg, #4ecdc4, #7ae7df);
+  border: none;
+  color: #fff;
+  border-radius: 20px;
+  padding: 0 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: linear-gradient(45deg, #3dbdba, #63e0d7);
+  transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+}
+
+/* Custom scrollbar for reviews list */
+.reviews-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.reviews-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.reviews-list::-webkit-scrollbar-thumb {
+  background: rgba(78, 205, 196, 0.5);
+  border-radius: 10px;
+}
+
+.reviews-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(78, 205, 196, 0.7);
+} 

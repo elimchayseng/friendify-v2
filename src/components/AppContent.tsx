@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import TopTracks from './TopTracks'
 import TrackOfDay from './TrackOfDay'
+import ChatReview from './ChatReview'
 import { ErrorBoundary } from './ErrorBoundary'
 import { handleSpotifyLogout } from '../lib/auth'
 import { getAllUserTracks, supabase } from '../lib/supabase'
+import './TrackReviewLayout.css'
 
 function AppContent() {
     const [error, setError] = useState<string | null>(null)
@@ -83,7 +85,14 @@ function AppContent() {
                     <div>Connecting to Spotify...</div>
                 ) : (
                     <ErrorBoundary>
-                        <TrackOfDay />
+                        <div className="track-review-container">
+                            <div style={{ width: '450px', maxWidth: '45%' }}>
+                                <TrackOfDay />
+                            </div>
+                            <div style={{ width: '450px', maxWidth: '45%' }}>
+                                <ChatReview />
+                            </div>
+                        </div>
                         <TopTracks userId={userId} />
                     </ErrorBoundary>
                 ) }

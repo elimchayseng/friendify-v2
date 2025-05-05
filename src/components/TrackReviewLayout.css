@@ -1,0 +1,28 @@
+.track-review-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 30px;
+  margin: 30px auto;
+  width: 95%;
+  max-width: 1000px;
+}
+
+/* Allow individual containers to keep their original styling */
+.track-review-container > * {
+  flex: 1;
+  max-width: 450px;
+}
+
+/* Responsive layout for mobile devices */
+@media (max-width: 768px) {
+  .track-review-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .track-review-container > * {
+    width: 100%;
+    max-width: 450px;
+  }
+} 
