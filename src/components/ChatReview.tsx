@@ -57,7 +57,7 @@ const ChatReview = forwardRef<HTMLDivElement>((props, ref) => {
             </div>
           ))
         ) : (
-          <p className="no-reviews">Be the first to review this track!</p>
+          <p className="no-reviews">Let your friends know what you think of the song!</p>
         )}
       </div>
 
