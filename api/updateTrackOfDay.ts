@@ -1,8 +1,52 @@
-import { supabase } from './lib/supabase.js'
-import {  getAllUsers, saveUserTracks } from '../src/lib/supabase.js'
-import { refreshSpotifyToken } from '../src/lib/auth.js'
+import { supabase, getAllUsers, saveUserTracks } from './lib/supabase.js'
 
 const cronSecret = process.env.CRON_SECRET
+const clientId = process.env.VITE_SPOTIFY_CLIENT_ID
+const clientSecret = process.env.VITE_SPOTIFY_CLIENT_SECRET
+
+export async function refreshSpotifyToken(refreshToken: string) {
+    try {
+        if (!clientId) {
+            throw new Error('Missing Spotify client ID')
+        }
+        if (!refreshToken) {
+            throw new Error('Missing refresh token')
+        }
+        console.log('Refreshing token with refresh token:', refreshToken)
+        console.log('ClientID', clientId)
+
+        const params = new URLSearchParams()
+      params.append("client_id", clientId || '')
+      params.append("grant_type", "refresh_token")
+      params.append("refresh_token", refreshToken)
+      params.append("client_secret", clientSecret || '')
+
+      const response = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params
+      })
+  
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error_description || data.error || 'Failed to refresh token')
+      }
+  
+      // Calculate expiration time
+      const expiresIn = data.expires_in || 3600 // Default to 1 hour
+      const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString()
+  
+      return {
+        access_token: data.access_token,
+        expires_at: expiresAt,
+        // Some implementations return a new refresh token, so include it if it's there
+        refresh_token: data.refresh_token || refreshToken
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error)
+      throw error
+    }
+  }
 
 // Helper function to fetch user's top tracks from Spotify
 async function fetchUserTopTracks(accessToken: string, userId: string) {
@@ -47,7 +91,7 @@ function isTokenExpired(expiresAt: string | null): boolean {
 
 // Cron so we have to use GET
 export async function GET(req: Request) {
-  // Verify the secret token from Vercel
+//   Verify the secret token from Vercel
   const authorization = req.headers.get('authorization')
   if (authorization !== `Bearer ${cronSecret}`) {
     console.log('Auth failed. Expected:', cronSecret, 'Got:', authorization)
@@ -55,7 +99,8 @@ export async function GET(req: Request) {
       status: 401,
       headers: { 'Content-Type': 'application/json' }
     })
-  }
+      }
+    console.log(req)
 
   try {
     // Part 1: Update all users' top tracks
