@@ -130,8 +130,8 @@ export async function getAllUserTracks() {
         spotify_id
       )
     `)
-        .order('rank', { ascending: true })
         .order('created_at', { ascending: false })
+        .limit(5)
 
     if (error) {
         console.error('Error fetching all user tracks:', error)
@@ -140,19 +140,24 @@ export async function getAllUserTracks() {
 
     // Group tracks by user
     const userTracks = (data as unknown as UserTrackWithRelations[])?.reduce((acc, track) => {
-        const userId = track.users.id
+        const userId = track.users.id;
         if (!acc[userId]) {
             acc[userId] = {
                 user: track.users,
                 tracks: []
-            }
+            };
         }
         acc[userId].tracks.push({
             ...track.tracks,
             rank: track.rank
-        })
-        return acc
-    }, {} as Record<string, { user: { id: string; username: string }, tracks: any[] }>)
+        });
+        return acc;
+    }, {} as Record<string, { user: { id: string; username: string }, tracks: any[] }>);
+
+    // Order tracks by rank for each user
+    Object.values(userTracks).forEach(userTrack => {
+        userTrack.tracks.sort((a, b) => a.rank - b.rank);
+    });
 
     return Object.values(userTracks) || []
 }
