@@ -83,7 +83,7 @@ function App() {
             // Check if user already exists
             const { data: existingUser, error: fetchError } = await supabase
                 .from('users')
-                .select('id, username')
+                .select('id, username, access_token, token_expires_at')
                 .eq('spotify_id', spotifyId)
                 .maybeSingle()
             
@@ -93,20 +93,22 @@ function App() {
             }
             console.log('Existing user:', existingUser)
             
-            // epoch seconds to ISO string
-            const expiresAt = new Date(session.expires_at * 1000).toISOString()
-            
-            if (!session.provider_token) {
-                console.error('No provider token found in session')
+            // Get token - always upsert to ensure we have current tokens
+            const accessToken = session.provider_token
+            if (!accessToken) {
+                console.error('No provider token available')
                 return
             }
+
+            // epoch seconds to ISO string
+            const expiresAt = new Date(session.expires_at * 1000).toISOString()
 
             // Check if we need to fetch user profile (new user or username missing)
             let username = existingUser?.username
             if (!username) {
                 // Fetch user profile from Spotify only if needed
                 const userResponse = await fetch('https://api.spotify.com/v1/me', {
-                    headers: { 'Authorization': `Bearer ${session.provider_token}` }
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
                 })
                 
                 if (!userResponse.ok) {
@@ -118,13 +120,13 @@ function App() {
                 username = userData.display_name
             }
             
-            // Create or update user in database
+            // Always upsert user to ensure we have current tokens
             const { data: dbUser, error: upsertError } = await supabase
                 .from('users')
                 .upsert({
                     spotify_id: spotifyId,
                     username,
-                    access_token: session.provider_token,
+                    access_token: accessToken,
                     refresh_token: session.provider_refresh_token,
                     token_expires_at: expiresAt
                 }, {
@@ -134,35 +136,18 @@ function App() {
                 .single()
             
             if (upsertError || !dbUser) {
-                console.error('Failed to create or update user in database', upsertError)
+                console.error('Failed to upsert user in database', upsertError)
                 return
             }
             
-            console.log('Found user:', dbUser.id)
+            console.log('User updated:', dbUser.id)
             
-            // Check last time of track update (new user or tracks older than 24 hours)
-            const { data: lastTrack, error: selectError } = await supabase
-                .from('user_tracks')
-                .select('last_updated_at')
-                .eq('user_id', dbUser.id)
-                .order('last_updated_at', { ascending: false })
-                .limit(1)
-                .maybeSingle()
-            
-            if (selectError) {
-                console.error('Error fetching last track update', selectError)
-                return
-            }
-            console.log('Last track update:', lastTrack)
-            
-            const needsUpdate = !lastTrack ||
-                (new Date().getTime() - new Date(lastTrack?.last_updated_at).getTime() > 24 * 60 * 60 * 1000)
-            
-            if (needsUpdate) {
-                // Fetch and save top tracks
+            // Only fetch tracks for new users
+            if (!existingUser) {
+                console.log('New user - fetching initial tracks')
                 const tracksResponse = await fetch(
                     'https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=5',
-                    { headers: { 'Authorization': `Bearer ${session.provider_token}` } }
+                    { headers: { 'Authorization': `Bearer ${accessToken}` } }
                 )
                 
                 if (!tracksResponse.ok) {
@@ -176,13 +161,13 @@ function App() {
                         const savedTracks = await saveUserTracks(dbUser.id, tracksData.items)
                         queryClient.setQueryData(['tracks', dbUser.id], savedTracks)
                         queryClient.invalidateQueries({ queryKey: ['all-user-tracks'] })
-                        console.log('User tracks saved:', savedTracks.length)
+                        console.log('Initial tracks saved for new user:', savedTracks.length)
                     } catch (trackError) {
-                        console.error('Error saving tracks:', trackError)
+                        console.error('Error saving initial tracks:', trackError)
                     }
                 }
             } else {
-                console.log('Skipping track update - tracks are less than 24 hours old')
+                console.log('Existing user - skipping track fetch, cron job will handle updates')
             }
         } catch (error) {
             console.error('Error handling successful login:', error)
