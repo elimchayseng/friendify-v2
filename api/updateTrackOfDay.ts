@@ -131,7 +131,7 @@ export async function GET(req: Request) {
             const tokenData = await refreshSpotifyToken(user.refresh_token)
             
             // Update user with new tokens
-            await supabase
+            const { error: updateError } = await supabase
               .from('users')
               .update({
                 access_token: tokenData.access_token,
@@ -139,6 +139,10 @@ export async function GET(req: Request) {
                 token_expires_at: tokenData.expires_at
               })
               .eq('id', user.id)
+            
+            if (updateError) {
+              console.error(`Failed to update user tokens for ${user.id}:`, updateError)
+            }
             
             accessToken = tokenData.access_token
           } catch (tokenError) {
