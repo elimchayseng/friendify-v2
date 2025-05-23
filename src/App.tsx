@@ -106,7 +106,7 @@ function App() {
             if (!username) {
                 // Fetch user profile from Spotify only if needed
                 const userResponse = await fetch('https://api.spotify.com/v1/me', {
-                    headers: { 'Authorization': `Bearer ${session.provider_token}` }
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
                 })
                 
                 if (!userResponse.ok) {
@@ -124,8 +124,8 @@ function App() {
                 .upsert({
                     spotify_id: spotifyId,
                     username,
-                    access_token: session.provider_token,
-                    refresh_token: session.provider_refresh_token || null,
+                    access_token: session.access_token,
+                    refresh_token: session.refresh_token,
                     token_expires_at: expiresAt
                 }, {
                     onConflict: 'spotify_id'
@@ -162,7 +162,7 @@ function App() {
                 // Fetch and save top tracks
                 const tracksResponse = await fetch(
                     'https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=5',
-                    { headers: { 'Authorization': `Bearer ${session.provider_token}` } }
+                    { headers: { 'Authorization': `Bearer ${session.access_token}` } }
                 )
                 
                 if (!tracksResponse.ok) {
