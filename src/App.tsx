@@ -96,8 +96,8 @@ function App() {
             // epoch seconds to ISO string
             const expiresAt = new Date(session.expires_at * 1000).toISOString()
             
-            if (!session.access_token) {
-                console.error('No access token found in session')
+            if (!session.provider_token) {
+                console.error('No provider token found in session')
                 return
             }
 
@@ -106,7 +106,7 @@ function App() {
             if (!username) {
                 // Fetch user profile from Spotify only if needed
                 const userResponse = await fetch('https://api.spotify.com/v1/me', {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                    headers: { 'Authorization': `Bearer ${session.provider_token}` }
                 })
                 
                 if (!userResponse.ok) {
@@ -124,8 +124,8 @@ function App() {
                 .upsert({
                     spotify_id: spotifyId,
                     username,
-                    access_token: session.access_token,
-                    refresh_token: session.refresh_token,
+                    access_token: session.provider_token,
+                    refresh_token: session.provider_refresh_token,
                     token_expires_at: expiresAt
                 }, {
                     onConflict: 'spotify_id'
@@ -162,7 +162,7 @@ function App() {
                 // Fetch and save top tracks
                 const tracksResponse = await fetch(
                     'https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=5',
-                    { headers: { 'Authorization': `Bearer ${session.access_token}` } }
+                    { headers: { 'Authorization': `Bearer ${session.provider_token}` } }
                 )
                 
                 if (!tracksResponse.ok) {
