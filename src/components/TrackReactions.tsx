@@ -27,11 +27,11 @@ const EMOJI_OPTIONS = [
   { emoji: '❤️', name: 'heart' }
 ];
 
-interface EmojiReviewProps {
+interface TrackReactionsProps {
   trackId?: string | null;
 }
 
-const EmojiReview = forwardRef<HTMLDivElement, EmojiReviewProps>(({ trackId }, ref) => {
+const TrackReactions = forwardRef<HTMLDivElement, TrackReactionsProps>(({ trackId }, ref) => {
   const [reviewText, setReviewText] = useState<string>('');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [username, setUsername] = useState<string>('');
@@ -319,4 +319,4 @@ const EmojiReview = forwardRef<HTMLDivElement, EmojiReviewProps>(({ trackId }, r
   );
 });
 
-export default EmojiReview;
+export default TrackReactions;

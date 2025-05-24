@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import TopTracks from './TopTracks'
 import TrackOfDay from './TrackOfDay'
-import EmojiReview from './EmojiReview'
+import TrackReactions from './TrackReactions'
 import { ErrorBoundary } from './ErrorBoundary'
 import { handleSpotifyLogout } from '../lib/auth'
 import { supabase } from '../lib/supabase'
@@ -120,7 +120,7 @@ function AppContent() {
                                 )}
                             </div>
                             <div className="chat-component">
-                                <EmojiReview trackId={trackOfDay?.id} />
+                                <TrackReactions trackId={trackOfDay?.id} />
                             </div>
                         </div>
                         <TopTracks userId={userId} />
