@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import TopTracks from './TopTracks'
 import TrackOfDay from './TrackOfDay'
-import ChatReview from './ChatReview'
+import EmojiReview from './EmojiReview'
 import { ErrorBoundary } from './ErrorBoundary'
 import { handleSpotifyLogout } from '../lib/auth'
-import { getAllUserTracks, supabase } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import './TrackReviewLayout.css'
 
 function AppContent() {
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [userId, setUserId] = useState<string | null>(null)
+    const [trackOfDay, setTrackOfDay] = useState<any>(null)
     const queryClient = useQueryClient()
 
     useEffect(() => {
@@ -39,6 +40,28 @@ function AppContent() {
                     setUserId(user.id)
                 } else {
                     console.log('No user found in database')
+                }
+                
+                // Get track of the day
+                const { data: trackOfDayData, error: trackError } = await supabase
+                    .from('tracks')
+                    .select(`
+                        *,
+                        user_tracks!inner (
+                          users!inner (
+                            username
+                          )
+                        )
+                      `)
+                    .eq('is_track_of_day', true)
+                    .maybeSingle()
+                
+                if (trackError) {
+                    console.error('Error fetching track of day:', trackError);
+                }
+                
+                if (trackOfDayData) {
+                    setTrackOfDay(trackOfDayData);
                 }
             } catch (err) {
                 console.error('Error fetching user data:', err)
@@ -87,10 +110,17 @@ function AppContent() {
                     <ErrorBoundary>
                         <div className="track-review-container">
                             <div className="track-component">
-                                <TrackOfDay />
+                                {trackOfDay ? (
+                                    <TrackOfDay trackData={trackOfDay} />
+                                ) : (
+                                    <div className="track-of-day-container">
+                                        <h2>Track of the Day</h2>
+                                        <p>No track selected for today</p>
+                                    </div>
+                                )}
                             </div>
                             <div className="chat-component">
-                                <ChatReview />
+                                <EmojiReview trackId={trackOfDay?.id} />
                             </div>
                         </div>
                         <TopTracks userId={userId} />

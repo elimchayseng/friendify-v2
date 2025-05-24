@@ -1,4 +1,4 @@
-.chat-review-container {
+.emoji-review-container {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border-radius: 15px;
@@ -10,18 +10,27 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 550px;
+  min-height: 600px;
 }
 
-.chat-review-container h2 {
+.emoji-review-container h2 {
   color: #fff;
   font-size: 1.6rem;
   margin-bottom: 15px;
   text-align: center;
   background: linear-gradient(45deg, #4ecdc4, #ff6b6b);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 700;
+}
+
+.emoji-review-container h3 {
+  color: #fff;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: 600;
 }
 
 .username-display {
@@ -40,15 +49,84 @@
   font-size: 0.9rem;
 }
 
+/* Emoji Section */
+.emoji-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.emoji-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 60px;
+}
+
+.emoji-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #4ecdc4;
+  transform: translateY(-2px);
+}
+
+.emoji-button.selected {
+  background: rgba(78, 205, 196, 0.3);
+  border-color: #4ecdc4;
+  box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+}
+
+.emoji-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.emoji-count {
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Reviews Section */
+.reviews-section {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .reviews-list {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   padding: 15px;
   margin-bottom: 15px;
-  max-height: none;
-  min-height: 250px;
+  height: 300px;
+  max-height: 300px;
   overflow-y: auto;
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
@@ -84,6 +162,7 @@
   margin: 0;
   word-break: break-word;
   font-size: 0.95rem;
+  text-align: left;
 }
 
 .no-reviews {
@@ -176,15 +255,29 @@
 
 /* Add responsive styles for mobile devices */
 @media (max-width: 768px) {
-  .chat-review-container {
+  .emoji-review-container {
     padding: 15px;
     max-width: 100%;
-    min-height: 400px;
+    min-height: 500px;
+  }
+  
+  .emoji-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  .emoji-button {
+    padding: 10px 6px;
+    min-height: 55px;
+  }
+  
+  .emoji {
+    font-size: 1.3rem;
   }
   
   .reviews-list {
-    min-height: 200px;
-    max-height: 300px;
+    min-height: 150px;
+    max-height: 250px;
   }
   
   .review-form {
@@ -207,4 +300,4 @@
     padding: 10px 40px 10px 15px;
     font-size: 16px; /* Prevent zoom on mobile */
   }
-} 
+}
