@@ -1,5 +1,5 @@
 import { useState, useEffect, forwardRef, useRef } from 'react';
-import './EmojiReview.css';
+import './TrackReactions.css';
 import { supabase } from '../lib/supabase';
 
 interface Review {
@@ -246,9 +246,7 @@ const TrackReactions = forwardRef<HTMLDivElement, TrackReactionsProps>(({ trackI
     <div className="emoji-review-container" ref={ref}>
       <h2>Track Reactions</h2>
       
-      <div className="username-display">
-        <span className="current-username">@{username}</span>
-      </div>
+
 
       {/* Emoji Reactions Section */}
       <div className="emoji-section">
