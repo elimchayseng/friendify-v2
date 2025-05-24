@@ -9,6 +9,9 @@ export async function refreshSpotifyToken(refreshToken: string) {
         if (!clientId) {
             throw new Error('Missing Spotify client ID')
         }
+        if (!clientSecret) {
+            throw new Error('Missing Spotify client secret')
+        }
         if (!refreshToken) {
             throw new Error('Missing refresh token')
         }
@@ -16,10 +19,10 @@ export async function refreshSpotifyToken(refreshToken: string) {
         console.log('ClientID', clientId)
 
         const params = new URLSearchParams()
-      params.append("client_id", clientId || '')
+      params.append("client_id", clientId)
       params.append("grant_type", "refresh_token")
       params.append("refresh_token", refreshToken)
-      params.append("client_secret", clientSecret || '')
+      params.append("client_secret", clientSecret)
 
       const response = await fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
