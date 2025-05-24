@@ -1,5 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '../lib/supabase'
 import './TrackOfDay.css'
 
 interface Track {
@@ -16,53 +14,17 @@ interface Track {
   }[]
 }
 
-export default function TrackOfDay() {
-  const { data: trackOfDay, isLoading, error } = useQuery<Track>({
-    queryKey: ['trackOfDay'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tracks')
-        .select(`
-            *,
-            user_tracks!inner (
-              users!inner (
-                username
-              )
-            )
-          `)
-        .eq('is_track_of_day', true)
-        .maybeSingle()
+interface TrackOfDayProps {
+  trackData?: Track | null
+}
 
-      if (error) throw error
-      console.log('Track of day data:', data)
-      return data as Track
-    },
-    // Cache the result for the whole day
-    staleTime: 24 * 60 * 60 * 1000,
-    gcTime: 24 * 60 * 60 * 1000,
-  })
+export default function TrackOfDay({ trackData }: TrackOfDayProps) {
+  const trackOfDay = trackData
 
   const handleTrackClick = (spotifyId: string) => {
     window.open(`https://open.spotify.com/track/${spotifyId}`, '_blank')
   }
 
-  if (isLoading) {
-    return (
-      <div className="track-of-day-container">
-        <h2>Track of the Day</h2>
-        <p className="loading">Loading...</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="track-of-day-container">
-        <h2>Track of the Day</h2>
-        <p className="error">Failed to load track of the day</p>
-      </div>
-    )
-  }
 
   if (!trackOfDay) {
     return (
@@ -78,6 +40,7 @@ export default function TrackOfDay() {
   return (
     <div className="track-of-day-container">
       <h2>Track of the Day</h2>
+      <h3>Brought to you by {username}</h3>
       <div 
         className="track-of-day"
         onClick={() => handleTrackClick(trackOfDay.spotify_id)}
@@ -103,8 +66,7 @@ export default function TrackOfDay() {
             <p className="album">{trackOfDay.album}</p>
           </div>
         </div>
-          </div>
-          <h3> Brought to you by {username}</h3>
+      </div>
     </div>
   )
 } 
