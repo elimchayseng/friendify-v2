@@ -2,7 +2,7 @@ import { supabase, getAllUsers, saveUserTracks } from './lib/supabase.js'
 
 const cronSecret = process.env.CRON_SECRET
 const clientId = process.env.VITE_SPOTIFY_CLIENT_ID
-const clientSecret = process.env.VITE_SPOTIFY_CLIENT_SECRET
+const clientSecret = process.env.SPOTIFY_CLIENT_SECRET
 
 export async function refreshSpotifyToken(refreshToken: string) {
     try {
