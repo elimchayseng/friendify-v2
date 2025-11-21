@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUserTracks } from "../lib/supabase";
 import "./TopTracks.css";
@@ -80,6 +80,63 @@ function TopTracks({ userId }: { userId: string | null }) {
     return () => clearTimeout(timeout);
   }, [copiedSelection]);
 
+  // Sort the current user's tracks to the top if we have a userId
+  const sortedUserTracks = useMemo(() => {
+    if (!allUserTracks || !Array.isArray(allUserTracks)) return [];
+    return [...allUserTracks].sort((a, b) => {
+      if (a.user.id === userId) return -1;
+      if (b.user.id === userId) return 1;
+      return 0;
+    });
+  }, [allUserTracks, userId]);
+
+  const userOptions = sortedUserTracks.map(({ user }) => user);
+
+  const filteredUserTracks = selectedUserIds.length
+    ? sortedUserTracks.filter(({ user }) => selectedUserIds.includes(user.id))
+    : sortedUserTracks;
+
+  const crossoverTracks = useMemo(() => {
+    const trackMap = new Map<
+      string,
+      {
+        track: Track;
+        users: UserTracks["user"][];
+      }
+    >();
+
+    filteredUserTracks.forEach(({ user, tracks }) => {
+      tracks.forEach((track) => {
+        const key =
+          track.spotify_id || `${track.name.toLowerCase()}-${track.artist.toLowerCase()}`;
+
+        const existing = trackMap.get(key);
+        if (existing) {
+          const alreadyAdded = existing.users.some((u) => u.id === user.id);
+          if (!alreadyAdded) {
+            trackMap.set(key, {
+              track: existing.track,
+              users: [...existing.users, user],
+            });
+          }
+        } else {
+          trackMap.set(key, { track, users: [user] });
+        }
+      });
+    });
+
+    return Array.from(trackMap.values())
+      .filter(({ users }) => users.length > 1)
+      .sort((a, b) => {
+        if (b.users.length !== a.users.length) {
+          return b.users.length - a.users.length;
+        }
+        const aRank = a.track.rank || 999;
+        const bRank = b.track.rank || 999;
+        return aRank - bRank;
+      });
+  }, [filteredUserTracks]);
+
   if (error) {
     return (
       <div className="tracks-wrapper">
@@ -98,11 +155,7 @@ function TopTracks({ userId }: { userId: string | null }) {
     );
   }
 
-  if (
-    !allUserTracks ||
-    !Array.isArray(allUserTracks) ||
-    allUserTracks.length === 0
-  ) {
+  if (sortedUserTracks.length === 0) {
     return (
       <div className="tracks-wrapper">
         <div className="tracks-container">
@@ -114,19 +167,6 @@ function TopTracks({ userId }: { userId: string | null }) {
       </div>
     );
   }
-
-  // Sort the current user's tracks to the top if we have a userId
-  const sortedUserTracks = [...allUserTracks].sort((a, b) => {
-    if (a.user.id === userId) return -1;
-    if (b.user.id === userId) return 1;
-    return 0;
-  });
-
-  const userOptions = sortedUserTracks.map(({ user }) => user);
-
-  const filteredUserTracks = selectedUserIds.length
-    ? sortedUserTracks.filter(({ user }) => selectedUserIds.includes(user.id))
-    : sortedUserTracks;
 
   const toggleUserSelection = (id: string) => {
     setSelectedUserIds((prev) =>
@@ -206,6 +246,45 @@ function TopTracks({ userId }: { userId: string | null }) {
   return (
     <div className="tracks-wrapper">
       <div className="tracks-container">
+        <div className="crossover-section">
+          <div className="crossover-header">
+            <h3>Shared Tracks</h3>
+            <div className="crossover-chip">
+              {crossoverTracks.length} found
+            </div>
+          </div>
+          {crossoverTracks.length === 0 ? (
+            <div className="crossover-empty">
+              No shared tracks among selected users yet.
+            </div>
+          ) : (
+            <div className="crossover-grid">
+              {crossoverTracks.map(({ track, users }) => (
+                <div key={track.spotify_id || track.id} className="crossover-card">
+                  <div className="crossover-track">
+                    <div className="crossover-rank">#{track.rank}</div>
+                    <div className="crossover-info">
+                      <div className="crossover-name">{track.name}</div>
+                      <div className="crossover-artist">{track.artist}</div>
+                    </div>
+                  </div>
+                  <div className="crossover-users">
+                    {users.map((user) => (
+                      <span
+                        key={user.id}
+                        className={`crossover-user ${
+                          user.id === userId ? "current-user" : ""
+                        }`}
+                      >
+                        {user.id === userId ? "You" : user.username}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="tracks-header">
           <div className="header-title">
             <h2>Top Tracks</h2>
