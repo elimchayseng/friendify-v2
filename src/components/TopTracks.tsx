@@ -21,10 +21,14 @@ interface UserTracks {
   tracks: Track[];
 }
 
+const NUMBER_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+
 function TopTracks({ userId }: { userId: string | null }) {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [copiedUserId, setCopiedUserId] = useState<string | null>(null);
+  const [copiedSelection, setCopiedSelection] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const {
@@ -63,6 +67,18 @@ function TopTracks({ userId }: { userId: string | null }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isDropdownOpen]);
+
+  useEffect(() => {
+    if (!copiedUserId) return;
+    const timeout = setTimeout(() => setCopiedUserId(null), 2000);
+    return () => clearTimeout(timeout);
+  }, [copiedUserId]);
+
+  useEffect(() => {
+    if (!copiedSelection) return;
+    const timeout = setTimeout(() => setCopiedSelection(false), 2000);
+    return () => clearTimeout(timeout);
+  }, [copiedSelection]);
 
   if (error) {
     return (
@@ -129,11 +145,71 @@ function TopTracks({ userId }: { userId: string | null }) {
       ? "All users"
       : `${selectedUserIds.length} selected`;
 
+  const copyTracksToClipboard = async (userTracks: UserTracks) => {
+    const label =
+      userTracks.user.id === userId
+        ? "My"
+        : `${userTracks.user.username}'s`;
+
+    const trackLines = userTracks.tracks.map((track, idx) => {
+      const prefix = NUMBER_EMOJIS[idx] || `${idx + 1}.`;
+      return `${prefix} ${track.name} — ${track.artist}`;
+    });
+
+    const text = [`🎧 ${label} Top Tracks`, ...trackLines].join("\n");
+
+    if (!navigator?.clipboard?.writeText) {
+      console.error("Clipboard API not available.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedUserId(userTracks.user.id);
+    } catch (err) {
+      console.error("Failed to copy tracks:", err);
+    }
+  };
+
+  const copySelectedUsersTracks = async () => {
+    if (!navigator?.clipboard?.writeText) {
+      console.error("Clipboard API not available.");
+      return;
+    }
+
+    const usersToCopy = filteredUserTracks;
+    if (!usersToCopy.length) return;
+
+    const sections = usersToCopy.map((userTracks) => {
+      const label =
+        userTracks.user.id === userId
+          ? "My"
+          : `${userTracks.user.username}'s`;
+
+      const trackLines = userTracks.tracks.map((track, idx) => {
+        const emojiIndex = track.rank ? track.rank - 1 : idx;
+        const prefix = NUMBER_EMOJIS[emojiIndex] || `#${track.rank || idx + 1}`;
+        return `${prefix} ${track.name} — ${track.artist}`;
+      });
+
+      return [`🎧 ${label} Top Tracks`, ...trackLines].join("\n");
+    });
+
+    try {
+      await navigator.clipboard.writeText(sections.join("\n\n"));
+      setCopiedSelection(true);
+    } catch (err) {
+      console.error("Failed to copy selected tracks:", err);
+    }
+  };
+
   return (
     <div className="tracks-wrapper">
       <div className="tracks-container">
         <div className="tracks-header">
-          <h2>Everyone's Top Tracks</h2>
+          <div className="header-title">
+            <h2>Top Tracks</h2>
+          </div>
           <div className="user-filter-bar">
             <div
               className={`filter-dropdown ${isDropdownOpen ? "open" : ""}`}
@@ -179,6 +255,19 @@ function TopTracks({ userId }: { userId: string | null }) {
                 </div>
               )}
             </div>
+            <button
+              type="button"
+              className="copy-selected-btn"
+              onClick={copySelectedUsersTracks}
+              aria-label={
+                copiedSelection ? "Copied selected tracks" : "Copy selected tracks"
+              }
+            >
+              <span className="copy-icon" aria-hidden="true" />
+              <span className="sr-only">
+                {copiedSelection ? "Copied!" : "Copy selected"}
+              </span>
+            </button>
           </div>
         </div>
         <div className="users-grid">
@@ -189,15 +278,34 @@ function TopTracks({ userId }: { userId: string | null }) {
                 userTracks.user.id === userId ? "current-user" : ""
               }`}
             >
-              <h3 className="username">
-                {userTracks.user.id === userId
-                  ? "Your"
-                  : `${userTracks.user.username}'s`}{" "}
-                Top Tracks
-                {userTracks.user.id === userId && (
-                  <span className="current-user-badge">You</span>
-                )}
-              </h3>
+              <div className="user-card-header">
+                <h3 className="username">
+                  {userTracks.user.id === userId
+                    ? "Your"
+                    : `${userTracks.user.username}'s`}{" "}
+                  Top Tracks
+                  {userTracks.user.id === userId && (
+                    <span className="current-user-badge">You</span>
+                  )}
+                </h3>
+                <button
+                  type="button"
+                  className="copy-tracks-btn"
+                  onClick={() => copyTracksToClipboard(userTracks)}
+                  aria-label={
+                    copiedUserId === userTracks.user.id
+                      ? "Copied to clipboard"
+                      : "Copy to clipboard"
+                  }
+                >
+                  <span className="copy-icon" aria-hidden="true" />
+                  <span className="sr-only">
+                    {copiedUserId === userTracks.user.id
+                      ? "Copied!"
+                      : "Copy to clipboard"}
+                  </span>
+                </button>
+              </div>
               <div className="tracks-list">
                 {userTracks.tracks.map((track: Track) => (
                   <div key={track.id} className="track-list-item">
