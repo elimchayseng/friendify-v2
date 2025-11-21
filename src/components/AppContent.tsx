@@ -8,6 +8,9 @@ import { handleSpotifyLogout } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import './TrackReviewLayout.css'
 
+// Feature flag for the Track of the Day + reactions block
+const SHOW_TRACK_OF_DAY_FEATURES = false
+
 function AppContent() {
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -42,27 +45,30 @@ function AppContent() {
                     console.log('No user found in database')
                 }
                 
-                // Get track of the day
-                const { data: trackOfDayData, error: trackError } = await supabase
-                    .from('tracks')
-                    .select(`
-                        *,
-                        user_tracks!inner (
-                          users!inner (
-                            username
-                          )
-                        )
-                      `)
-                    .eq('is_track_of_day', true)
-                    .maybeSingle()
-                
-                if (trackError) {
-                    console.error('Error fetching track of day:', trackError);
+                if (SHOW_TRACK_OF_DAY_FEATURES) {
+                    // Get track of the day
+                    const { data: trackOfDayData, error: trackError } = await supabase
+                        .from('tracks')
+                        .select(`
+                            *,
+                            user_tracks!inner (
+                              users!inner (
+                                username
+                              )
+                            )
+                          `)
+                        .eq('is_track_of_day', true)
+                        .maybeSingle()
+                    
+                    if (trackError) {
+                        console.error('Error fetching track of day:', trackError);
+                    }
+                    
+                    if (trackOfDayData) {
+                        setTrackOfDay(trackOfDayData);
+                    }
                 }
                 
-                if (trackOfDayData) {
-                    setTrackOfDay(trackOfDayData);
-                }
             } catch (err) {
                 console.error('Error fetching user data:', err)
                 setError('Failed to load user data. Please try logging in again.')
@@ -108,21 +114,23 @@ function AppContent() {
                     <div>Connecting to Spotify...</div>
                 ) : (
                     <ErrorBoundary>
-                        <div className="track-review-container">
-                            <div className="track-component">
-                                {trackOfDay ? (
-                                    <TrackOfDay trackData={trackOfDay} />
-                                ) : (
-                                    <div className="track-of-day-container">
-                                        <h2>Track of the Day</h2>
-                                        <p>No track selected for today</p>
-                                    </div>
-                                )}
+                        {SHOW_TRACK_OF_DAY_FEATURES && (
+                            <div className="track-review-container">
+                                <div className="track-component">
+                                    {trackOfDay ? (
+                                        <TrackOfDay trackData={trackOfDay} />
+                                    ) : (
+                                        <div className="track-of-day-container">
+                                            <h2>Track of the Day</h2>
+                                            <p>No track selected for today</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="chat-component">
+                                    <TrackReactions trackId={trackOfDay?.id} />
+                                </div>
                             </div>
-                            <div className="chat-component">
-                                <TrackReactions trackId={trackOfDay?.id} />
-                            </div>
-                        </div>
+                        )}
                         <TopTracks userId={userId} />
                     </ErrorBoundary>
                 ) }
