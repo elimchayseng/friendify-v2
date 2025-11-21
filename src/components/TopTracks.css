@@ -33,8 +33,110 @@ html, body, #root {
 }
 
 .tracks-container h2 {
-  margin-bottom: 24px;
-  text-align: center;
+  margin: 0;
+}
+
+.tracks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.user-filter-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: auto;
+}
+
+.filter-dropdown {
+  position: relative;
+  width: 280px;
+}
+
+.filter-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(24, 24, 24, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.filter-toggle:hover {
+  border-color: rgba(29, 185, 84, 0.5);
+  background-color: rgba(29, 185, 84, 0.08);
+}
+
+.filter-dropdown.open .filter-toggle {
+  border-color: rgba(29, 185, 84, 0.7);
+  background-color: rgba(29, 185, 84, 0.1);
+}
+
+.filter-toggle-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.filter-toggle-value {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.filter-toggle-icon {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-left: 8px;
+}
+
+.filter-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 100%;
+  background: rgba(18, 18, 18, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  padding: 10px 0;
+  z-index: 5;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.filter-option:hover {
+  background: rgba(29, 185, 84, 0.08);
+}
+
+.filter-option input {
+  accent-color: #1DB954;
+}
+
+.filter-option-label {
+  flex: 1;
+}
+
+.filter-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6px 0;
 }
 
 
@@ -230,6 +332,16 @@ html, body, #root {
   .users-grid {
     grid-template-columns: repeat(2, 1fr); /* 2 users per row on medium screens */
   }
+
+  .filter-dropdown {
+    width: 300px;
+  }
+
+  .tracks-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -250,4 +362,12 @@ html, body, #root {
   .tracks-container {
     width: 95%;
   }
-} 
+
+  .tracks-header {
+    align-items: stretch;
+  }
+
+  .filter-dropdown {
+    width: 100%;
+  }
+}
