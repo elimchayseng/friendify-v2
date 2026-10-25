@@ -1140,7 +1140,7 @@
   .picker-options {
     padding: 20px 16px;
   }
-  .picker-models {
+  .picker-model-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
