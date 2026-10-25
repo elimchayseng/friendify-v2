@@ -100,7 +100,7 @@ function PositionedPlayer({
         onTrack={props.controls.onTrack}
         onFocus={props.controls.onFocus}
       />
-      {!props.focused && (
+      {!props.focused && props.activeId === player.user.id && (
         <Html
           center
           position={[
