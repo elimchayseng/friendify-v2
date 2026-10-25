@@ -18,6 +18,12 @@ interface EmojiCount {
   count: number;
 }
 
+type ReviewResult = Omit<Review, 'users'> & { users: Review['users'] | Review['users'][] };
+const normalizeReview = (review: ReviewResult): Review => ({
+  ...review,
+  users: Array.isArray(review.users) ? review.users[0] || { username: 'A friend' } : review.users,
+});
+
 const EMOJI_OPTIONS = [
   { emoji: '👍', name: 'thumbs_up' },
   { emoji: '👎', name: 'thumbs_down' },
@@ -34,7 +40,7 @@ interface TrackReactionsProps {
 const TrackReactions = forwardRef<HTMLDivElement, TrackReactionsProps>(({ trackId }, ref) => {
   const [reviewText, setReviewText] = useState<string>('');
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [username, setUsername] = useState<string>('');
+  const [, setUsername] = useState<string>('');
   const [userId, setUserId] = useState<string>('');
   const [emojiCounts, setEmojiCounts] = useState<EmojiCount[]>([]);
   const [userReaction, setUserReaction] = useState<string | null>(null);
@@ -56,7 +62,8 @@ const TrackReactions = forwardRef<HTMLDivElement, TrackReactionsProps>(({ trackI
             .eq('spotify_id', session.user.user_metadata.provider_id)
             .single();
           
-          if (user && user.username) {
+        if (error) throw error;
+        if (user && user.username) {
             setUsername(user.username);
             setUserId(user.id);
           } else {
@@ -125,7 +132,7 @@ const TrackReactions = forwardRef<HTMLDivElement, TrackReactionsProps>(({ trackI
         if (reviewsError) throw reviewsError;
 
         if (reviewsData) {
-          setReviews(reviewsData);
+          setReviews(reviewsData.map(normalizeReview));
           // Scroll to bottom after loading reviews
           setTimeout(() => {
             if (reviewsListRef.current) {
@@ -227,7 +234,7 @@ const TrackReactions = forwardRef<HTMLDivElement, TrackReactionsProps>(({ trackI
 
       if (data) {
         // Add new review to the end of the list (newest at bottom)
-        setReviews([...reviews, data]);
+        setReviews([...reviews, normalizeReview(data)]);
         setReviewText('');
         
         // Scroll to bottom to show new review
