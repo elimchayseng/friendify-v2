@@ -1,6 +1,7 @@
 import { drawArtwork } from '../../lib/artwork'
 import * as THREE from 'three'
 import type { Player } from '../../lib/music'
+import type { IpodScreen } from '../../lib/ipods'
 
 function textureCanvas(width: number, height: number) {
   const canvas = document.createElement('canvas')
@@ -19,8 +20,11 @@ function fit(ctx: CanvasRenderingContext2D, text: string, max: number) {
   while (end > 0 && ctx.measureText(`${text.slice(0, end)}…`).width > max) end--
   return `${text.slice(0, end)}…`
 }
-export function createLCD() {
-  return textureCanvas(1024, 840)
+export function createLCD(screen: IpodScreen | null) {
+  // WebGL texture storage cannot be resized after its first upload.
+  return screen?.color
+    ? textureCanvas(640, screen.portrait ? 1002 : 480)
+    : textureCanvas(1024, 840)
 }
 export function drawLCD(
   target: ReturnType<typeof createLCD>,
@@ -28,10 +32,6 @@ export function drawLCD(
   shared: boolean
 ) {
   const { context: ctx, texture } = target
-  if (target.canvas.width !== 1024 || target.canvas.height !== 840) {
-    target.canvas.width = 1024
-    target.canvas.height = 840
-  }
   const mini = player.device.model === 'mini2'
   ctx.setTransform(2, 0, 0, 2, 0, 0)
   ctx.clearRect(0, 0, 512, 420)
@@ -250,10 +250,6 @@ export function drawColorLCD(
   const { context: ctx, texture } = target
   const width = 640,
     height = portrait ? 1002 : 480
-  if (target.canvas.width !== width || target.canvas.height !== height) {
-    target.canvas.width = width
-    target.canvas.height = height
-  }
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.clearRect(0, 0, width, height)
   ctx.fillStyle = '#fff'

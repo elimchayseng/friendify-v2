@@ -79,7 +79,7 @@ export default function IpodModel({
       alive = false
     }
   }, [artworkUrl])
-  const lcd = useMemo(createLCD, [])
+  const lcd = useMemo(() => createLCD(screen), [screen])
   const metalNormal = useMemo(createMetalNormalTexture, [])
   useEffect(() => () => metalNormal.dispose(), [metalNormal])
   const back = useMemo(
