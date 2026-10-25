@@ -45,6 +45,7 @@ export default function IpodPicker({
 }: Props) {
   const dialog = useRef<HTMLDialogElement>(null)
   const previewRef = useRef<HTMLDivElement>(null)
+  const modelsRef = useRef<HTMLDivElement>(null)
   const [nativeScale, setNativeScale] = useState(1)
   const [previewReady, setPreviewReady] = useState(false)
   const [selection, setSelection] = useState<IpodSelection>(player.device)
@@ -85,9 +86,21 @@ export default function IpodPicker({
   const draft: Player = { ...player, device: selection, state, selected }
   useEffect(() => {
     const element = dialog.current
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     element?.showModal()
-    return () => element?.close()
+    return () => {
+      element?.close()
+      document.body.style.overflow = overflow
+    }
   }, [])
+  useEffect(() => {
+    const rail = modelsRef.current
+    const chosen = rail?.querySelector<HTMLElement>('.is-chosen')
+    if (rail && chosen && rail.scrollWidth > rail.clientWidth) {
+      rail.scrollLeft = chosen.offsetLeft - rail.offsetLeft - rail.clientWidth / 2 + chosen.clientWidth / 2
+    }
+  }, [selection.model])
   const action = (_id: string, type: PlayerAction) => {
     if (type === 'play' || (type === 'select' && state.detail)) {
       if (selected)
@@ -267,51 +280,53 @@ export default function IpodPicker({
             <legend>
               01 <span>Pick a model</span>
             </legend>
-            {IPODS.map((option) => (
-              <label
-                className={`picker-model-option ${selection.model === option.id ? 'is-chosen' : ''}`}
-                key={option.id}
-              >
-                <input
-                  type="radio"
-                  name="ipod-model"
-                  value={option.id}
-                  checked={selection.model === option.id}
-                  onChange={() => {
-                    setTouched(true)
-                    setSelection({
+            <div ref={modelsRef} className="picker-model-grid">
+              {IPODS.map((option) => (
+                <label
+                  className={`picker-model-option ${selection.model === option.id ? 'is-chosen' : ''}`}
+                  key={option.id}
+                >
+                  <input
+                    type="radio"
+                    name="ipod-model"
+                    value={option.id}
+                    checked={selection.model === option.id}
+                    onChange={() => {
+                      setTouched(true)
+                      setSelection({
+                        model: option.id,
+                        finish: option.defaultFinish,
+                      })
+                      setState((current) => ({
+                        ...current,
+                        detail: false,
+                        flipped: false,
+                        reset: current.reset + 1,
+                      }))
+                      setError('')
+                    }}
+                  />
+                  <DeviceSilhouette
+                    selection={{
                       model: option.id,
-                      finish: option.defaultFinish,
-                    })
-                    setState((current) => ({
-                      ...current,
-                      detail: false,
-                      flipped: false,
-                      reset: current.reset + 1,
-                    }))
-                    setError('')
-                  }}
-                />
-                <DeviceSilhouette
-                  selection={{
-                    model: option.id,
-                    finish:
-                      option.id === selection.model
-                        ? selection.finish
-                        : option.defaultFinish,
-                  }}
-                />
-                <span>
-                  <strong>{option.name}</strong>
-                  <small>
-                    {option.generation} <i>·</i> {option.year}
-                  </small>
-                </span>
-                <b aria-hidden="true">
-                  {selection.model === option.id ? '✓' : ''}
-                </b>
-              </label>
-            ))}
+                      finish:
+                        option.id === selection.model
+                          ? selection.finish
+                          : option.defaultFinish,
+                    }}
+                  />
+                  <span>
+                    <strong>{option.name}</strong>
+                    <small>
+                      {option.generation} <i>·</i> {option.year}
+                    </small>
+                  </span>
+                  <b aria-hidden="true">
+                    {selection.model === option.id ? '✓' : ''}
+                  </b>
+                </label>
+              ))}
+            </div>
           </fieldset>
           <fieldset className="picker-finishes" disabled={saving}>
             <legend>
