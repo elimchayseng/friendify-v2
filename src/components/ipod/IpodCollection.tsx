@@ -110,6 +110,7 @@ export default function IpodCollection({
   const [capable, setCapable] = useState(supports3D)
   const [ready, setReady] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [browseOpen, setBrowseOpen] = useState(false)
   const [shufflePanelOpen, setShufflePanelOpen] = useState(true)
   const client = useQueryClient()
   const preferences = useQuery({
@@ -140,6 +141,7 @@ export default function IpodCollection({
   const helpRef = useRef<HTMLDialogElement>(null)
   const filterRef = useRef<HTMLDetailsElement>(null)
   const menuRef = useRef<HTMLDetailsElement>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
   const { data, error, isLoading, isFetching, refetch } = useQuery<
     UserTracks[]
   >({
@@ -234,10 +236,19 @@ export default function IpodCollection({
     setShufflePanelOpen(true)
   }
   const pending = isLoading || profileLoading
-  const visibleTrackCount = players.reduce(
-    (sum, player) => sum + player.tracks.length,
-    0
-  )
+  const filterSummary = [
+    filter === 'shared' ? 'Shared songs' : filter === 'you' ? 'Your songs' : '',
+    search.trim() ? `“${search.trim()}”` : '',
+    selectedFriends.length
+      ? `${selectedFriends.length} ${selectedFriends.length === 1 ? 'friend' : 'friends'}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
+  useEffect(() => {
+    if (browseOpen) searchRef.current?.focus()
+  }, [browseOpen])
 
   useEffect(() => {
     const resize = () => {
@@ -285,6 +296,11 @@ export default function IpodCollection({
         menuRef.current.querySelector('summary')?.focus()
       }
       filterRef.current?.removeAttribute('open')
+      const browse = document.getElementById('collection-browse')
+      if (browse && !browse.hidden && !document.querySelector('dialog[open]')) {
+        setBrowseOpen(false)
+        document.querySelector<HTMLButtonElement>('.browse-toggle')?.focus()
+      }
     }
     document.addEventListener('pointerdown', close)
     document.addEventListener('keydown', escape)
@@ -445,6 +461,10 @@ export default function IpodCollection({
     })
   }, [])
   const fitAll = useCallback(() => setViewport({ scale: 1, x: 0, y: 0 }), [])
+  const resetView = () => {
+    fitAll()
+    if (mobile && active) onAction(active.user.id, 'reset')
+  }
   const inspect = (id: string) => {
     setShufflePanelOpen(true)
     setActiveId(id)
@@ -507,6 +527,20 @@ export default function IpodCollection({
     setFilter(next)
     setViewport({ scale: 1, x: 0, y: 0 })
   }
+  const clearFilters = () => {
+    setSearch('')
+    setSelectedFriends([])
+    chooseFilter('all')
+  }
+  const closePicker = () => {
+    setPickerOpen(false)
+    requestAnimationFrame(() => {
+      const trigger = mobile
+        ? menuRef.current?.querySelector('summary')
+        : document.querySelector<HTMLButtonElement>('.choose-ipod-button')
+      trigger?.focus({ preventScroll: true })
+    })
+  }
 
   return (
     <div
@@ -518,7 +552,8 @@ export default function IpodCollection({
           event.altKey ||
           helpOpen ||
           pickerOpen ||
-          event.target instanceof HTMLInputElement
+          event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLSelectElement
         )
           return
         if (['+', '=', '-', '0'].includes(event.key)) {
@@ -538,78 +573,133 @@ export default function IpodCollection({
           friendify
         </a>
         <div className="header-right">
-          <button
-            className="choose-ipod-button"
-            aria-label="Choose your iPod"
-            disabled={!ownPlayer || profileLoading}
-            onClick={() => setPickerOpen(true)}
-          >
-            <span className="mini-ipod-glyph" aria-hidden="true" />
-            <span className="choose-long-label">Choose your iPod</span>
-            <span className="choose-short-label">Your iPod</span>
-          </button>
-          {mobile ? (
-            <details ref={menuRef} className="mobile-menu">
-              <summary aria-label="More options">
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <circle cx="5" cy="12" r="1.7" />
-                  <circle cx="12" cy="12" r="1.7" />
-                  <circle cx="19" cy="12" r="1.7" />
-                </svg>
-              </summary>
-              <div
-                className="mobile-menu-panel"
-                onClick={() => menuRef.current?.removeAttribute('open')}
-              >
-                <button onClick={() => void invite()}>
-                  Invite a friend <span aria-hidden="true">↗</span>
-                </button>
-                <button onClick={() => void copy()} disabled={!players.length}>
-                  Copy tracks <HardwareIcon name="copy" />
-                </button>
-                <button onClick={() => setHelpOpen(true)}>
-                  Controls <span aria-hidden="true">?</span>
-                </button>
-                <button onClick={onLogout} disabled={signingOut}>
-                  {signingOut ? 'Signing out…' : 'Sign out'}
-                </button>
-              </div>
-            </details>
-          ) : (
-            <>
-                <button
-                  className="aqua-button"
-                  onClick={invite}
-                  aria-label="Invite a friend"
-                >
-                  <span className="invite-long-label">Invite a friend</span>
-                  <span className="invite-short-label">Invite</span>
-                  <span aria-hidden="true">↗</span>
-                </button>
-                <button
-                  className="account-button"
-                  onClick={onLogout}
-                  disabled={signingOut}
-                  aria-label={
-                    signingOut
-                      ? 'Signing out'
-                      : `Sign out ${username || 'of Spotify'}`
-                  }
-                >
-                  {signingOut ? 'Signing out…' : 'Sign out'}
-                </button>
-            </>
+          {!mobile && (
+            <button
+              className="choose-ipod-button"
+              aria-label="Choose your iPod"
+              disabled={!ownPlayer || profileLoading}
+              onClick={() => setPickerOpen(true)}
+            >
+              <span className="mini-ipod-glyph" aria-hidden="true" />
+              <span className="choose-long-label">Choose your iPod</span>
+              <span className="choose-short-label">Your iPod</span>
+            </button>
           )}
+          <button
+            className={`browse-toggle ${filterSummary ? 'has-filters' : ''}`}
+            aria-label={
+              browseOpen ? 'Close search and filters' : 'Search and filter iPods'
+            }
+            aria-expanded={browseOpen}
+            aria-controls="collection-browse"
+            onClick={() => {
+              menuRef.current?.removeAttribute('open')
+              setBrowseOpen((open) => !open)
+            }}
+          >
+            {browseOpen ? <HardwareIcon name="close" /> : <SearchIcon />}
+          </button>
+          <details
+            ref={menuRef}
+            className="mobile-menu"
+            onToggle={(event) => {
+              if (event.currentTarget.open) setBrowseOpen(false)
+            }}
+          >
+            <summary aria-label="More options">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <circle cx="5" cy="12" r="1.7" />
+                <circle cx="12" cy="12" r="1.7" />
+                <circle cx="19" cy="12" r="1.7" />
+              </svg>
+            </summary>
+            <div
+              className="mobile-menu-panel"
+              onClick={(event) => {
+                if (!(event.target as Element).closest('[data-stay-open]')) {
+                  menuRef.current?.removeAttribute('open')
+                  menuRef.current
+                    ?.querySelector('summary')
+                    ?.focus({ preventScroll: true })
+                }
+              }}
+            >
+              {mobile && (
+                <button
+                  onClick={() => setPickerOpen(true)}
+                  disabled={!ownPlayer || profileLoading}
+                >
+                  Choose your iPod
+                  <span className="mini-ipod-glyph" aria-hidden="true" />
+                </button>
+              )}
+              <button onClick={() => void invite()}>
+                Invite a friend <span aria-hidden="true">↗</span>
+              </button>
+              <button
+                onClick={() => void copy(mobile ? active?.user.id : undefined)}
+                disabled={!players.length}
+              >
+                {mobile ? 'Copy this top five' : 'Copy tracks'}
+                <HardwareIcon name="copy" />
+              </button>
+              {capable && active && !pending && !error && (
+                <>
+                  <div
+                    className="menu-view-controls"
+                    role="group"
+                    aria-label="View controls"
+                  >
+                    <button
+                      aria-label="Zoom out"
+                      data-stay-open
+                      disabled={viewport.scale <= 0.65}
+                      onClick={() => onZoom(1 / 1.25)}
+                    >
+                      −
+                    </button>
+                    <button
+                      aria-label="Zoom in"
+                      data-stay-open
+                      disabled={viewport.scale >= 3.5}
+                      onClick={() => onZoom(1.25)}
+                    >
+                      +
+                    </button>
+                    <button onClick={resetView}>
+                      {mobile ? 'Reset iPod' : 'Fit all'}
+                    </button>
+                  </div>
+                  <button onClick={() => onAction(active.user.id, 'flip')}>
+                    {active.state.flipped ? 'Face front' : 'Turn over'}
+                    <HardwareIcon name="flip" />
+                  </button>
+                </>
+              )}
+              <button onClick={() => setHelpOpen(true)}>
+                Controls <span aria-hidden="true">?</span>
+              </button>
+              <button onClick={onLogout} disabled={signingOut}>
+                {signingOut ? 'Signing out…' : 'Sign out'}
+              </button>
+            </div>
+          </details>
         </div>
       </header>
-      <div className="collection-toolbar">
+      <div
+        className="collection-toolbar"
+        id="collection-browse"
+        hidden={!browseOpen}
+        role="search"
+        aria-label="Search and filters"
+      >
         <div className="controls">
           <div className="segments" role="group" aria-label="Collection filter">
             {(
               [
                 ['all', 'Everyone'],
                 ['shared', 'Shared songs'],
-                ['you', 'Your iPod'],
+                ['you', 'Just me'],
               ] as const
             ).map(([value, label]) => (
               <button
@@ -624,6 +714,7 @@ export default function IpodCollection({
           <div className="search">
             <SearchIcon />
             <input
+              ref={searchRef}
               type="search"
               value={search}
               onChange={(event) => {
@@ -674,19 +765,23 @@ export default function IpodCollection({
                 ))}
               </fieldset>
             </details>
-            <button
-              className="text-control"
-              onClick={() => {
-                void copy()
-              }}
-              disabled={!players.length}
-            >
-              <HardwareIcon name="copy" />
-              Copy tracks
-            </button>
           </div>
         </div>
       </div>
+      {filterSummary && !browseOpen && (
+        <div className="active-collection-filter">
+          <button onClick={() => setBrowseOpen(true)}>{filterSummary}</button>
+          <button
+            aria-label="Clear filters"
+            onClick={() => {
+              clearFilters()
+              document.querySelector<HTMLButtonElement>('.browse-toggle')?.focus()
+            }}
+          >
+            <HardwareIcon name="close" />
+          </button>
+        </div>
+      )}
       <main
         ref={galleryRef}
         className="main collection-main"
@@ -698,7 +793,6 @@ export default function IpodCollection({
             players={players}
             active={active}
             userId={userId}
-            reduced={reduced}
             onSelect={inspect}
             onNavigate={navigate}
           />
@@ -866,9 +960,6 @@ export default function IpodCollection({
                 ))}
               </div>
             )}
-            {mobile && (
-              <p className="mobile-device-hint">Drag to spin · Pinch to zoom</p>
-            )}
             <div className="keyboard-controls">
               <span>Click wheel</span>
               {active && (
@@ -962,94 +1053,13 @@ export default function IpodCollection({
               )}
             </aside>
           )}
-        {capable && players.length > 0 && !pending && !error && (
-          <div className="explore-dock">
-            <span className="explore-hint">
-              Click a name to get closer <span aria-hidden="true">·</span> Drag
-              space to explore
-            </span>
-            <div
-              className="viewport-controls"
-              role="group"
-              aria-label="Collection zoom"
-            >
-              <button
-                aria-label="Zoom out"
-                title="Zoom out (−)"
-                disabled={viewport.scale <= 0.65}
-                onClick={() => onZoom(1 / 1.25)}
-              >
-                −
-              </button>
-              <output aria-live="polite" aria-label="Zoom level">
-                {Math.round(viewport.scale * 100)}%
-              </output>
-              <button
-                aria-label="Zoom in"
-                title="Zoom in (+)"
-                disabled={viewport.scale >= 3.5}
-                onClick={() => onZoom(1.25)}
-              >
-                +
-              </button>
-              <span className="zoom-divider" />
-              <button
-                className="fit-all"
-                onClick={() => {
-                  fitAll()
-                  if (mobile && active) onAction(active.user.id, 'reset')
-                }}
-                title={mobile ? 'Reset iPod and zoom' : 'Fit all iPods (0)'}
-              >
-                {mobile ? 'Reset' : 'Fit all'} <span aria-hidden="true">↙↗</span>
-              </button>
-            </div>
-            {mobile && active && (
-              <button
-                className="mobile-flip"
-                aria-label={`${active.state.flipped ? 'Face front' : 'Turn over'} ${active.user.username}’s iPod`}
-                onClick={() => onAction(active.user.id, 'flip')}
-              >
-                <HardwareIcon name="flip" />
-              </button>
-            )}
-            <button
-              className="help-orbit"
-              aria-label="Controls"
-              title="Controls"
-              onClick={() => setHelpOpen(true)}
-            >
-              ?
-            </button>
-          </div>
-        )}
         {mobile && capable && active && !pending && !error && (
           <MobileTopFive
             player={active}
-            index={players.findIndex((player) => player.user.id === active.user.id)}
-            count={players.length}
             controls={controls}
           />
         )}
       </main>
-      <footer className="app-footer">
-        <span>
-          <i className="status-dot" />
-          {visibleTrackCount} {visibleTrackCount === 1 ? 'song' : 'songs'} in{' '}
-          {players.length} {players.length === 1 ? 'iPod' : 'iPods'}
-        </span>
-        <div>
-          <button
-            className={`sound-toggle ${sounds ? 'enabled' : ''}`}
-            aria-pressed={sounds}
-            onClick={() => setSounds(!sounds)}
-            title="Optional click-wheel sound"
-          >
-            Clicks {sounds ? 'on' : 'off'}
-          </button>
-          <span className="footer-label">SPOTIFY · LAST 4 WEEKS</span>
-        </div>
-      </footer>
       <div className="sr-only" role="status" aria-live="polite">
         {active?.selected
           ? `${active.user.username}: number ${active.selected.rank}, ${active.selected.name} by ${active.selected.artist}. ${active.state.detail ? 'Track details open.' : ''}`
@@ -1087,7 +1097,7 @@ export default function IpodCollection({
             void preferences.refetch()
           }}
           onSave={saveDevice}
-          onClose={() => setPickerOpen(false)}
+          onClose={closePicker}
         />
       )}
       <dialog
@@ -1110,10 +1120,10 @@ export default function IpodCollection({
             <dt>Explore</dt>
             <dd>
               {mobile ? (
-                'Use the friend strip or arrows to switch iPods. Pinch the device area or use + and − to zoom. Reset brings your iPod back into view.'
+                'Use the name selector or arrows to switch iPods. Pinch the device area to zoom. More options contains zoom buttons and Reset iPod.'
               ) : (
                 <>Scroll or pinch your trackpad to zoom. Drag empty space to pan,
-                or click a friend’s name to move closer. Fit all brings everyone
+                or click a friend’s name to move closer. Fit all in More options brings everyone
                 back into view.</>
               )}
             </dd>
@@ -1136,8 +1146,8 @@ export default function IpodCollection({
             <dt>Inspect</dt>
             <dd>
               Drag the body to turn an iPod in your hand, or use Turn over to
-              see its engraved back. On phones, scroll the friend strip to find
-              another iPod, and use the list below the device to browse songs.
+              see its engraved back. More options also has a Turn over button.
+              On phones, tap a song in the list to open it in Spotify.
             </dd>
           </div>
           <div>
