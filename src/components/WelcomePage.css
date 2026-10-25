@@ -4,6 +4,10 @@
   place-items: center;
   padding: 30px 24px 70px;
 }
+.sign-in-app {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
 .sign-in-panel {
   width: min(100%, 350px);
   text-align: center;
@@ -102,8 +106,8 @@
 }
 @media (max-width: 600px) {
   .sign-in-app .site-header {
-    height: 90px;
-    min-height: 90px;
+    height: 76px;
+    min-height: 76px;
   }
   .sign-in-app .sign-in-main {
     padding-bottom: 60px;

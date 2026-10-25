@@ -36,10 +36,13 @@ import Starfield from './Starfield'
 import IpodPicker from './IpodPicker'
 import { AlbumArtwork } from './NativeDevice'
 import { collectionZoom, playerPosition, type CollectionView } from './layout'
+import { MobileFriendNav, MobileTopFive } from './MobileCollection'
 import './Collection.css'
 import './Space.css'
+import './Mobile.css'
 
 const IpodScene = lazy(() => import('./IpodScene'))
+const mobileQuery = '(max-width: 760px), (max-width: 950px) and (max-height: 500px)'
 interface Props {
   userId: string | null
   username?: string
@@ -128,12 +131,15 @@ export default function IpodCollection({
   })
   const galleryRef = useRef<HTMLElement>(null)
   const [width, setWidth] = useState(window.innerWidth)
+  const [mobile, setMobile] = useState(() => window.matchMedia(mobileQuery).matches)
+  const [sceneVisible, setSceneVisible] = useState(true)
   const [notice, setNotice] = useState('')
   const [helpOpen, setHelpOpen] = useState(false)
   const [sounds, setSounds] = useState(false)
   const audio = useRef<AudioContext | null>(null)
   const helpRef = useRef<HTMLDialogElement>(null)
   const filterRef = useRef<HTMLDetailsElement>(null)
+  const menuRef = useRef<HTMLDetailsElement>(null)
   const { data, error, isLoading, isFetching, refetch } = useQuery<
     UserTracks[]
   >({
@@ -200,6 +206,7 @@ export default function IpodCollection({
   )
   const active =
     players.find((player) => player.user.id === activeId) || players[0] || null
+  const scenePlayers = mobile && active ? [active] : players
   const ownSource = users.find(({ user }) => user.id === userId)
   const ownDevice = preferences.data?.[userId || ''] || DEFAULT_IPOD
   const ownState = states[userId || ''] || initialPlayer
@@ -233,10 +240,28 @@ export default function IpodCollection({
   )
 
   useEffect(() => {
-    const resize = () => setWidth(window.innerWidth)
+    const resize = () => {
+      setWidth(window.innerWidth)
+      setMobile(window.matchMedia(mobileQuery).matches)
+    }
     window.addEventListener('resize', resize)
     return () => window.removeEventListener('resize', resize)
   }, [])
+  useEffect(() => {
+    setViewport({ scale: 1, x: 0, y: 0 })
+  }, [mobile])
+  useEffect(() => {
+    const stage = galleryRef.current?.querySelector('.scene-shell')
+    if (!stage || !mobile) {
+      setSceneVisible(true)
+      return
+    }
+    const observer = new IntersectionObserver(([entry]) =>
+      setSceneVisible(entry.isIntersecting)
+    )
+    observer.observe(stage)
+    return () => observer.disconnect()
+  }, [mobile, ready, capable, pending, error])
   useEffect(() => {
     if (!notice) return
     const timeout = setTimeout(() => setNotice(''), 4000)
@@ -247,13 +272,26 @@ export default function IpodCollection({
     else if (!helpOpen && helpRef.current?.open) helpRef.current.close()
   }, [helpOpen])
   useEffect(() => {
-    if (!filterRef.current) return
     const close = (event: PointerEvent) => {
       if (!filterRef.current?.contains(event.target as Node))
         filterRef.current?.removeAttribute('open')
+      if (!menuRef.current?.contains(event.target as Node))
+        menuRef.current?.removeAttribute('open')
+    }
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      if (menuRef.current?.open) {
+        menuRef.current.removeAttribute('open')
+        menuRef.current.querySelector('summary')?.focus()
+      }
+      filterRef.current?.removeAttribute('open')
     }
     document.addEventListener('pointerdown', close)
-    return () => document.removeEventListener('pointerdown', close)
+    document.addEventListener('keydown', escape)
+    return () => {
+      document.removeEventListener('pointerdown', close)
+      document.removeEventListener('keydown', escape)
+    }
   }, [])
   useEffect(
     () => () => {
@@ -410,6 +448,10 @@ export default function IpodCollection({
   const inspect = (id: string) => {
     setShufflePanelOpen(true)
     setActiveId(id)
+    if (mobile) {
+      setViewport({ scale: 1, x: 0, y: 0 })
+      return
+    }
     const gallery = galleryRef.current
     const index = players.findIndex((player) => player.user.id === id)
     if (!gallery || index < 0) return
@@ -468,7 +510,7 @@ export default function IpodCollection({
 
   return (
     <div
-      className={`app collection-app ${viewport.scale < 1.35 && players.length > 3 ? 'is-overview' : ''}`}
+      className={`app collection-app ${mobile ? 'mobile-collection' : ''} ${!mobile && viewport.scale < 1.35 && players.length > 3 ? 'is-overview' : ''}`}
       onKeyDown={(event) => {
         if (
           event.ctrlKey ||
@@ -506,27 +548,58 @@ export default function IpodCollection({
             <span className="choose-long-label">Choose your iPod</span>
             <span className="choose-short-label">Your iPod</span>
           </button>
-          <button
-            className="aqua-button"
-            onClick={invite}
-            aria-label="Invite a friend"
-          >
-            <span className="invite-long-label">Invite a friend</span>
-            <span className="invite-short-label">Invite</span>
-            <span aria-hidden="true">↗</span>
-          </button>
-          <button
-            className="account-button"
-            onClick={onLogout}
-            disabled={signingOut}
-            aria-label={
-              signingOut
-                ? 'Signing out'
-                : `Sign out ${username || 'of Spotify'}`
-            }
-          >
-            {signingOut ? 'Signing out…' : 'Sign out'}
-          </button>
+          {mobile ? (
+            <details ref={menuRef} className="mobile-menu">
+              <summary aria-label="More options">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <circle cx="5" cy="12" r="1.7" />
+                  <circle cx="12" cy="12" r="1.7" />
+                  <circle cx="19" cy="12" r="1.7" />
+                </svg>
+              </summary>
+              <div
+                className="mobile-menu-panel"
+                onClick={() => menuRef.current?.removeAttribute('open')}
+              >
+                <button onClick={() => void invite()}>
+                  Invite a friend <span aria-hidden="true">↗</span>
+                </button>
+                <button onClick={() => void copy()} disabled={!players.length}>
+                  Copy tracks <HardwareIcon name="copy" />
+                </button>
+                <button onClick={() => setHelpOpen(true)}>
+                  Controls <span aria-hidden="true">?</span>
+                </button>
+                <button onClick={onLogout} disabled={signingOut}>
+                  {signingOut ? 'Signing out…' : 'Sign out'}
+                </button>
+              </div>
+            </details>
+          ) : (
+            <>
+                <button
+                  className="aqua-button"
+                  onClick={invite}
+                  aria-label="Invite a friend"
+                >
+                  <span className="invite-long-label">Invite a friend</span>
+                  <span className="invite-short-label">Invite</span>
+                  <span aria-hidden="true">↗</span>
+                </button>
+                <button
+                  className="account-button"
+                  onClick={onLogout}
+                  disabled={signingOut}
+                  aria-label={
+                    signingOut
+                      ? 'Signing out'
+                      : `Sign out ${username || 'of Spotify'}`
+                  }
+                >
+                  {signingOut ? 'Signing out…' : 'Sign out'}
+                </button>
+            </>
+          )}
         </div>
       </header>
       <div className="collection-toolbar">
@@ -620,6 +693,16 @@ export default function IpodCollection({
         id="collection-main"
       >
         <h1 className="sr-only">Friends’ top five songs</h1>
+        {mobile && active && !pending && !error && (
+          <MobileFriendNav
+            players={players}
+            active={active}
+            userId={userId}
+            reduced={reduced}
+            onSelect={inspect}
+            onNavigate={navigate}
+          />
+        )}
         {pending ? (
           <div className="collection-state" role="status">
             <span className="mini-player-loader" aria-hidden="true" />
@@ -679,7 +762,11 @@ export default function IpodCollection({
             data-renderer={ready ? 'webgl' : 'loading'}
             tabIndex={0}
             role="group"
-            aria-label="3D iPod collection. Select a device, use up and down arrows to browse, Enter to select, Escape for MENU, I to turn over, and R to reset."
+            aria-label={
+              mobile
+                ? `Interactive ${active?.user.username || 'friend'}’s iPod. Drag to turn, pinch to zoom, or browse the song list below. Use left and right arrows to switch friends.`
+                : '3D iPod collection. Select a device, use up and down arrows to browse, Enter to select, Escape for MENU, I to turn over, and R to reset.'
+            }
             onKeyDown={(event) => {
               if (
                 (event.target instanceof HTMLButtonElement &&
@@ -746,11 +833,12 @@ export default function IpodCollection({
                 }
               >
                 <IpodScene
-                  players={players}
+                  players={scenePlayers}
                   userId={userId}
                   activeId={activeId}
-                  columns={columns}
-                  reduced={reduced || pickerOpen || helpOpen}
+                  columns={mobile ? 1 : columns}
+                  focused={mobile}
+                  reduced={reduced || pickerOpen || helpOpen || !sceneVisible}
                   shared={filter === 'shared'}
                   controls={controls}
                   view={viewport}
@@ -762,20 +850,25 @@ export default function IpodCollection({
                 />
               </Suspense>
             </SceneBoundary>
-            <div className="sr-only" aria-label="Songs in this collection">
-              {players.map((player) => (
-                <section key={player.user.id}>
-                  <h2>{player.user.username}’s top five</h2>
-                  <ol>
-                    {player.tracks.map((track) => (
-                      <li key={track.id}>
-                        {track.rank}. {track.name} by {track.artist}
-                      </li>
-                    ))}
-                  </ol>
-                </section>
-              ))}
-            </div>
+            {!mobile && (
+              <div className="sr-only" aria-label="Songs in this collection">
+                {players.map((player) => (
+                  <section key={player.user.id}>
+                    <h2>{player.user.username}’s top five</h2>
+                    <ol>
+                      {player.tracks.map((track) => (
+                        <li key={track.id}>
+                          {track.rank}. {track.name} by {track.artist}
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+                ))}
+              </div>
+            )}
+            {mobile && (
+              <p className="mobile-device-hint">Drag to spin · Pinch to zoom</p>
+            )}
             <div className="keyboard-controls">
               <span>Click wheel</span>
               {active && (
@@ -810,9 +903,10 @@ export default function IpodCollection({
             </div>
           </div>
         ) : (
-          <MusicFallback players={players} controls={controls} />
+          <MusicFallback players={scenePlayers} controls={controls} />
         )}
         {capable &&
+          !mobile &&
           active?.device.model === 'shuffle2' &&
           shufflePanelOpen &&
           !pending &&
@@ -901,12 +995,24 @@ export default function IpodCollection({
               <span className="zoom-divider" />
               <button
                 className="fit-all"
-                onClick={fitAll}
-                title="Fit all iPods (0)"
+                onClick={() => {
+                  fitAll()
+                  if (mobile && active) onAction(active.user.id, 'reset')
+                }}
+                title={mobile ? 'Reset iPod and zoom' : 'Fit all iPods (0)'}
               >
-                Fit all <span aria-hidden="true">↙↗</span>
+                {mobile ? 'Reset' : 'Fit all'} <span aria-hidden="true">↙↗</span>
               </button>
             </div>
+            {mobile && active && (
+              <button
+                className="mobile-flip"
+                aria-label={`${active.state.flipped ? 'Face front' : 'Turn over'} ${active.user.username}’s iPod`}
+                onClick={() => onAction(active.user.id, 'flip')}
+              >
+                <HardwareIcon name="flip" />
+              </button>
+            )}
             <button
               className="help-orbit"
               aria-label="Controls"
@@ -916,6 +1022,14 @@ export default function IpodCollection({
               ?
             </button>
           </div>
+        )}
+        {mobile && capable && active && !pending && !error && (
+          <MobileTopFive
+            player={active}
+            index={players.findIndex((player) => player.user.id === active.user.id)}
+            count={players.length}
+            controls={controls}
+          />
         )}
       </main>
       <footer className="app-footer">
@@ -995,9 +1109,13 @@ export default function IpodCollection({
           <div>
             <dt>Explore</dt>
             <dd>
-              Scroll or pinch your trackpad to zoom. Drag empty space to pan, or
-              click a friend’s name to move closer. Fit all brings everyone back
-              into view.
+              {mobile ? (
+                'Use the friend strip or arrows to switch iPods. Pinch the device area or use + and − to zoom. Reset brings your iPod back into view.'
+              ) : (
+                <>Scroll or pinch your trackpad to zoom. Drag empty space to pan,
+                or click a friend’s name to move closer. Fit all brings everyone
+                back into view.</>
+              )}
             </dd>
           </div>
           <div>
@@ -1018,8 +1136,8 @@ export default function IpodCollection({
             <dt>Inspect</dt>
             <dd>
               Drag the body to turn an iPod in your hand, or use Turn over to
-              see its engraved back. On phones, use the arrows or swipe the
-              empty background to explore. Click a name to zoom to its iPod.
+              see its engraved back. On phones, scroll the friend strip to find
+              another iPod, and use the list below the device to browse songs.
             </dd>
           </div>
           <div>

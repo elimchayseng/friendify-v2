@@ -21,6 +21,7 @@ interface Props extends ViewControls {
   userId: string | null
   activeId: string | null
   columns: number
+  focused?: boolean
   reduced: boolean
   shared: boolean
   controls: PlayerControls
@@ -66,7 +67,7 @@ function PositionedPlayer({
   })
   return (
     <group ref={ref} position={initialPosition.current}>
-      {
+      {!props.focused && (
         <Html
           center
           position={[
@@ -87,7 +88,7 @@ function PositionedPlayer({
             controls={props.controls}
           />
         </Html>
-      }
+      )}
       <IpodModel
         key={player.device.model}
         player={player}
@@ -99,7 +100,7 @@ function PositionedPlayer({
         onTrack={props.controls.onTrack}
         onFocus={props.controls.onFocus}
       />
-      {
+      {!props.focused && (
         <Html
           center
           position={[
@@ -113,26 +114,41 @@ function PositionedPlayer({
         >
           <PlayerCaption player={player} controls={props.controls} />
         </Html>
-      }
+      )}
     </group>
   )
 }
 function World(props: Props) {
   const { camera, size, invalidate, gl, scene, raycaster } = useThree()
+  const modelIds = [...new Set(props.players.map((player) => player.device.model))]
+    .sort()
+    .join(',')
   const geometries = useMemo(
     () =>
       Object.fromEntries(
-        IPODS.map((model) => [model.id, createModelGeometry(model)])
+        IPODS.filter((model) => modelIds.split(',').includes(model.id)).map(
+          (model) => [model.id, createModelGeometry(model)]
+        )
       ) as Record<IpodModelId, ReturnType<typeof createModelGeometry>>,
-    []
+    [modelIds]
   )
+  const focusedModel =
+    props.focused && props.players[0]
+      ? ipodDefinition(props.players[0].device.model)
+      : null
   const zoom =
-    collectionZoom(
-      size.width,
-      size.height,
-      props.columns,
-      props.players.length
-    ) * props.view.scale
+    (focusedModel
+      ? Math.min(
+          size.width / (focusedModel.width + 1.2),
+          size.height / (focusedModel.height + 0.9),
+          100
+        )
+      : collectionZoom(
+          size.width,
+          size.height,
+          props.columns,
+          props.players.length
+        )) * props.view.scale
   const current = useRef(props)
   current.current = props
   const wheelValue = useRef(0)
@@ -258,7 +274,7 @@ export default function IpodScene(props: Props) {
     <Canvas
       orthographic
       frameloop="demand"
-      dpr={[1, 1.75]}
+      dpr={[1, props.focused ? 1.5 : 1.75]}
       camera={{ position: [0, 0, 14], zoom: 100, near: 0.1, far: 100 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'low-power' }}
       onCreated={({ gl }) => {

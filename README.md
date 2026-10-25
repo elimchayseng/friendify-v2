@@ -48,6 +48,7 @@ Artwork comes from the existing Spotify `tracks.image_url`. Missing or blocked i
 - Scroll outside the wheel, pinch with two fingers, or use +/− to zoom. Drag empty space to pan. Click a name to move closer; **Fit all** restores the overview.
 - With the collection focused, ↑/↓ browse songs, Enter selects, Escape returns, I flips, R resets, and ←/→ jump between friends. +/− zoom and 0 fits everyone. A native keyboard control bar appears on focus.
 - There is a single 3D collection view. Browsers without WebGL 2, or those that lose their graphics context, get a keyboard-accessible song list with direct Spotify links.
+- Phones show one large 3D iPod at a time. Scroll the friend strip or use its arrows to switch people, and browse the readable top-five list below the device. Touch rotation, pinch zoom, and reset remain available. Landscape places the device beside the songs. The mobile picker keeps model choices, the preview, finishes, and saving within a full-screen dialog.
 - Click-wheel sound is optional and off by default. Reduced-motion preferences are respected.
 
 Search, shared-song filtering, friend selection, individual/visible-track copying, and invite links are available in both views. Track-of-the-day and reaction functionality remains behind its existing disabled feature flag.

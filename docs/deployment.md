@@ -16,6 +16,7 @@ This replaces the frontend using the existing React/Vite build, Supabase project
 
 - `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build`. The test suite executes PostgreSQL policies through PGlite and checks cron authorization without external requests.
 - Browser inspection at desktop, tablet, and phone sizes; keyboard navigation, dialog focus, reduced motion, model previews, album artwork, zoom/pan/pinch, and WebGL failure recovery.
+- Mobile browser emulation at 320–600px, phone landscape, and resizing back to desktop: contained header actions, readable top-five lists, friend navigation, native touch rotation/pinch, normal page scrolling beside the device, full-screen picker, saved choices, and WebGL recovery. Accessibility checks also cover mobile sign-in and picker layouts.
 - Account save, reload, cancel, failed-save retry, and delayed-preference loading using isolated mock Supabase/Spotify responses.
 - PostgreSQL execution of the migration with distinct authentication and profile UUIDs, including valid owner writes, rejected cross-account writes, finish constraints, anonymous read-only access, and profile deletion cleanup.
 - Cron authentication checks with configured/missing secrets using fake local environment values and no external API requests.
