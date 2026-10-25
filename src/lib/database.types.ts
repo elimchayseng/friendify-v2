@@ -9,6 +9,23 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      ipod_preferences: {
+        Row: {
+          user_id: string
+          owner_id: string
+          model: string
+          finish: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          owner_id?: string
+          model: string
+          finish: string
+          updated_at?: string
+        }
+        Update: { model?: string; finish?: string; updated_at?: string }
+      }
       users: {
         Row: {
           id: string
@@ -69,4 +86,4 @@ export interface Database {
       }
     }
   }
-} 
+}

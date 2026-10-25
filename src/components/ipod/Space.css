@@ -1,0 +1,793 @@
+html {
+  color-scheme: dark;
+}
+body {
+  background: #020203;
+  color: #e8eaf0;
+}
+.collection-app {
+  --space-text: #e8eaf0;
+  --space-muted: #9b9fa9;
+  --space-line: #ffffff24;
+  --space-surface: #111215;
+  position: relative;
+  isolation: isolate;
+  height: 100dvh;
+  min-height: 500px;
+  color: var(--space-text);
+  background: #020203;
+}
+.collection-app::before,
+.collection-app::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+.collection-app::before {
+  background: url('/starfield.svg') center / 1680px 1100px repeat;
+}
+.collection-app::after {
+  background: url('/star-glow.svg') center / 1680px 1100px repeat;
+  animation: starlight 7s ease-in-out infinite alternate;
+}
+@keyframes starlight {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.collection-app .site-header {
+  height: 66px;
+  min-height: 66px;
+  padding: 0 32px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.collection-app .wordmark {
+  font-size: 22px;
+  letter-spacing: -1px;
+  color: #f1f2f6;
+}
+.collection-app .logo-box {
+  width: 23px;
+  height: 28px;
+}
+.collection-app .logo-box::after {
+  left: 5px;
+}
+.collection-app .header-right {
+  gap: 14px;
+}
+.collection-app .aqua-button {
+  color: #12170f;
+  background: #d9e7d0;
+  border: 1px solid #ecf6e5;
+  border-radius: 7px;
+  text-shadow: none;
+  box-shadow: 0 1px 12px #cbeeb314;
+  font-size: 11px;
+  min-height: 36px;
+}
+.collection-app .aqua-button:hover {
+  background: #effce6;
+  box-shadow: 0 0 20px #cbeeb32e;
+}
+.collection-app .account-button {
+  color: #b1b4bd;
+}
+.collection-app .collection-toolbar {
+  flex-shrink: 0;
+  padding: 2px 32px 14px;
+  gap: 0;
+}
+.collection-app .controls {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+}
+.collection-app .segments {
+  background: #101114d9;
+  border-color: var(--space-line);
+  border-radius: 7px;
+  box-shadow: none;
+  overflow: visible;
+}
+.collection-app .segments button {
+  color: #b0b3bd;
+  min-height: 34px;
+  text-shadow: none;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 6px;
+}
+.collection-app .segments button[aria-pressed='true'] {
+  color: #f0f1f5;
+  background: #ffffff1c;
+  box-shadow: inset 0 0 0 1px #ffffff13;
+}
+.collection-app .segments button:hover:not(:disabled) {
+  color: #fff;
+  background: #ffffff24;
+}
+.collection-app .search {
+  width: 225px;
+  height: 36px;
+  border-color: var(--space-line);
+  background: #101114d9;
+  box-shadow: none;
+  border-radius: 7px;
+}
+.collection-app .search input {
+  color: #f1f3f8;
+  font-size: 11px;
+}
+.collection-app .search input::placeholder {
+  color: #9297a2;
+}
+.collection-app .search svg {
+  color: #b0b6c1;
+}
+.collection-app .utility-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+.collection-app .text-control,
+.collection-app .friend-filter summary {
+  color: #aeb3be;
+  font-size: 11px;
+  min-height: 36px;
+}
+.collection-app .text-control:hover,
+.collection-app .friend-filter summary:hover {
+  color: white;
+}
+.collection-app .friend-filter fieldset {
+  background: #101114;
+  border-color: #41434b;
+  box-shadow: 0 14px 45px #0009;
+  color: #e2e5ee;
+}
+.collection-app .friend-filter label:first-of-type {
+  border-color: #ffffff24;
+}
+.collection-app .friend-filter input {
+  accent-color: #c1dcb0;
+}
+.collection-app .collection-main {
+  padding: 0 0 80px;
+  background: transparent;
+  overflow: hidden;
+}
+.collection-app .scene-shell {
+  min-height: 0;
+  touch-action: none;
+}
+.collection-app .scene-shell {
+  cursor: grab;
+  overflow: clip;
+}
+.collection-app .person-name {
+  color: #dce1ec;
+  font-size: 12px;
+  gap: 6px;
+}
+.collection-app .person-name:hover {
+  color: #fff;
+}
+.collection-app .person-name .inspect-cue {
+  font-size: 12px;
+  color: #96a5bb;
+  margin-left: 2px;
+}
+.collection-app .person-header {
+  gap: 6px;
+}
+.collection-app.is-overview .person-avatar,
+.collection-app.is-overview .person-copy,
+.collection-app.is-overview .you {
+  display: none;
+}
+.collection-app.is-overview .person-name {
+  max-width: 100%;
+  font-size: 11px;
+}
+.collection-app.is-overview .person-caption > span,
+.collection-app.is-overview .person-caption > i {
+  display: none;
+}
+.collection-app .person-caption {
+  font-size: 9px;
+}
+.collection-app .inspect-button {
+  color: #a5aec0;
+}
+.collection-app .inspect-button:hover {
+  color: white;
+}
+.collection-app .model-caption .person-caption {
+  min-height: 28px;
+}
+.explore-dock {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  max-width: calc(100% - 32px);
+}
+.explore-hint {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #a3a8b6;
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+}
+.explore-hint > span {
+  padding: 0 8px;
+  color: #646b7a;
+}
+.viewport-controls {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border: 1px solid #ffffff28;
+  border-radius: 12px;
+  background: #111216e8;
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 4px 30px #0008,
+    inset 0 1px #ffffff08;
+  flex-shrink: 0;
+}
+.viewport-controls button {
+  width: 36px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  color: #e7ebf3;
+}
+.viewport-controls button:hover:not(:disabled) {
+  background: #ffffff18;
+}
+.viewport-controls button:active:not(:disabled) {
+  background: #ffffff26;
+  transform: scale(0.94);
+}
+.viewport-controls output {
+  min-width: 48px;
+  text-align: center;
+  color: #bac3d2;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.zoom-divider {
+  width: 1px;
+  height: 18px;
+  background: #ffffff22;
+  margin: 0 6px;
+}
+.viewport-controls .fit-all {
+  width: auto;
+  padding: 0 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.fit-all > span {
+  font-size: 15px;
+}
+.help-orbit {
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  border: 1px solid #ffffff35;
+  color: #aab4c7;
+  background: #101115;
+  font-size: 12px;
+}
+.help-orbit:hover {
+  color: #fff;
+  border-color: #a3b4d4;
+}
+.collection-app .app-footer {
+  min-height: 36px;
+  padding: 0 32px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #9b9fa9;
+  font-size: 9px;
+}
+.collection-app .footer-label {
+  color: #9b9fa9;
+  font-size: 8px;
+}
+.collection-app .sound-toggle {
+  color: #abb5c6;
+}
+.collection-app .collection-dialog {
+  color: #f1f2f6;
+  background: #101114;
+  border: 1px solid #ffffff35;
+  box-shadow: 0 30px 120px #000c;
+}
+.collection-app .collection-dialog::backdrop {
+  background: #000a;
+  backdrop-filter: blur(8px);
+}
+.collection-app .collection-dialog dd,
+.collection-app .collection-dialog dt,
+.collection-app .sound-setting {
+  color: #b8c0ce;
+}
+.collection-app .collection-dialog dl > div {
+  border-color: #ffffff24;
+}
+.collection-app .dialog-close {
+  color: #c0c8d8;
+}
+.collection-app .toast {
+  color: #e9eef7;
+  background: #14171e;
+  border-color: #536078;
+  box-shadow: 0 8px 40px #0009;
+}
+.collection-app .dismiss-notice {
+  color: #e9eef7;
+}
+.collection-app .keyboard-controls {
+  color: #e3e9f5;
+  background: #151922;
+  border-color: #5c6982;
+}
+.collection-app .keyboard-controls > button,
+.collection-app .keyboard-controls > a {
+  color: #e3e9f5;
+  background: #252e3b;
+  border-color: #687892;
+}
+.collection-app :focus-visible {
+  outline: 2px solid #c4d5ff;
+  outline-offset: 3px;
+}
+@media (max-width: 950px) {
+  .collection-app .site-header {
+    padding: 0 22px;
+  }
+  .collection-app .collection-toolbar {
+    padding: 2px 22px 12px;
+  }
+  .collection-app .controls {
+    gap: 9px;
+  }
+  .collection-app .search {
+    width: 190px;
+  }
+  .collection-app .utility-controls {
+    gap: 12px;
+  }
+  .collection-app .app-footer {
+    padding: 0 22px;
+  }
+  .collection-app .text-control {
+    font-size: 0;
+  }
+  .collection-app .text-control svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+@media (max-width: 600px) {
+  .collection-app .site-header {
+    height: 60px;
+    min-height: 60px;
+    padding: 0 18px;
+  }
+  .collection-app .collection-toolbar {
+    padding: 0 18px 8px;
+  }
+  .collection-app .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px 8px;
+  }
+  .collection-app .controls > .segments:first-child {
+    order: 0;
+  }
+  .collection-app .segments button {
+    padding: 0 10px;
+    min-height: 32px;
+    font-size: 10px;
+  }
+  .collection-app .controls > .search {
+    order: 1;
+    min-width: 90px;
+    flex: 1;
+    width: auto;
+    height: 34px;
+  }
+  .collection-app .utility-controls {
+    order: 2;
+    width: 100%;
+    min-height: 28px;
+    justify-content: flex-end;
+    gap: 16px;
+  }
+  .collection-app .friend-filter summary {
+    min-height: 28px;
+    font-size: 10px;
+  }
+  .collection-app .text-control {
+    min-height: 28px;
+  }
+  .collection-app .aqua-button {
+    font-size: 10px;
+    min-height: 32px;
+    padding: 6px 11px;
+  }
+  .collection-app .wordmark {
+    font-size: 21px;
+  }
+  .collection-app .app-footer {
+    padding: 0 18px;
+    min-height: 34px;
+    font-size: 8px;
+  }
+  .collection-app .footer-label {
+    display: none;
+  }
+  .collection-app .collection-main {
+    padding-bottom: 88px;
+  }
+  .explore-dock {
+    bottom: 18px;
+    gap: 10px;
+  }
+  .explore-hint {
+    font-size: 9px;
+  }
+  .explore-hint > span {
+    padding: 0 4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .collection-app::after {
+    animation: none;
+    opacity: 0.75;
+  }
+}
+/* The header is deliberately oversized; the collection controls stay compact. */
+.collection-app .site-header {
+  height: 99px;
+  min-height: 99px;
+  padding: 0 48px;
+}
+.collection-app .wordmark {
+  font-size: 33px;
+  gap: 16px;
+  letter-spacing: -1.5px;
+}
+.collection-app .logo-box {
+  width: 35px;
+  height: 42px;
+  border-radius: 7px;
+}
+.collection-app .logo-box::before {
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  height: 13.5px;
+}
+.collection-app .logo-box::after {
+  width: 15px;
+  height: 15px;
+  left: 8.5px;
+  bottom: 4.5px;
+  box-shadow: inset 0 0 0 4.5px #f9faf3;
+}
+.collection-app .site-header .aqua-button {
+  min-height: 54px;
+  padding: 10px 22px;
+  font-size: 16px;
+  border-radius: 10px;
+  gap: 11px;
+}
+.collection-app .site-header .aqua-button svg {
+  width: 22px;
+  height: 22px;
+}
+.collection-app .site-header .account-button {
+  font-size: 14px;
+  min-height: 48px;
+}
+.collection-app::after {
+  animation: none;
+}
+.space-motion {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+.star-glimmer {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #f1f6ff;
+  box-shadow:
+    0 0 4px 1px #d1e1ffb3,
+    0 0 13px 3px #8faeff38;
+  animation: glimmer ease-in-out infinite alternate;
+}
+@keyframes glimmer {
+  0%,
+  15% {
+    opacity: 0.15;
+    transform: scale(0.6);
+  }
+  70% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+.shooting-star {
+  position: absolute;
+  left: var(--meteor-left);
+  top: var(--meteor-top);
+  width: 150px;
+  height: 1px;
+  opacity: 0;
+  background: linear-gradient(90deg, #fff 0%, #b4cdffba 12%, transparent 100%);
+  transform-origin: left center;
+  animation: meteor linear infinite both;
+}
+.shooting-star::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  width: 3px;
+  height: 3px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px 2px #c9ddffb3;
+}
+@keyframes meteor {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(-32deg);
+  }
+  0.5%,
+  3% {
+    opacity: 1;
+  }
+  5%,
+  100% {
+    opacity: 0;
+    transform: translate3d(-48vw, 30vw, 0) rotate(-32deg);
+  }
+}
+@media (max-width: 600px) {
+  .collection-app .site-header {
+    height: 90px;
+    min-height: 90px;
+    padding: 0 18px;
+    gap: 14px;
+  }
+  .collection-app .wordmark {
+    font-size: 31px;
+    gap: 12px;
+  }
+  .collection-app .site-header .aqua-button {
+    min-height: 48px;
+    font-size: 14px;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .collection-app .site-header .aqua-button svg {
+    width: 20px;
+    height: 20px;
+  }
+  .collection-app .site-header .account-button {
+    font-size: 11px;
+    padding: 4px;
+  }
+}
+@media (max-width: 360px) {
+  .collection-app .site-header .connect-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .collection-app .site-header .aqua-button {
+    min-width: 48px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .space-motion {
+    display: none;
+  }
+}
+/* Larger navigation targets, with room for the search and friend controls. */
+.collection-app .controls {
+  gap: 18px;
+}
+.collection-app .segments button {
+  min-height: 51px;
+  padding: 0 19px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.collection-app .controls > .segments {
+  flex-shrink: 0;
+}
+.collection-app .search {
+  width: 300px;
+  height: 54px;
+  padding: 0 15px;
+  gap: 10px;
+}
+.collection-app .search input {
+  font-size: 16px;
+}
+.collection-app .search svg {
+  width: 18px;
+  height: 18px;
+}
+.collection-app .utility-controls {
+  gap: 24px;
+}
+.collection-app .text-control,
+.collection-app .friend-filter summary {
+  min-height: 54px;
+  font-size: 16px;
+  gap: 9px;
+}
+.collection-app .text-control svg {
+  width: 18px;
+  height: 18px;
+}
+.collection-app .friend-filter fieldset {
+  top: 58px;
+  min-width: 220px;
+}
+.collection-app .friend-filter label {
+  min-height: 44px;
+  font-size: 15px;
+}
+.collection-app .person-name {
+  min-height: 32px;
+}
+.star-glimmer {
+  width: 3px;
+  height: 3px;
+  background: #fff;
+  box-shadow:
+    0 0 5px 2px #e1ebffbb,
+    0 0 18px 5px #97b9ff50;
+  animation-name: vivid-glimmer;
+  animation-direction: normal;
+}
+.star-glimmer::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  background:
+    linear-gradient(90deg, transparent 43%, #dceaff 50%, transparent 57%),
+    linear-gradient(transparent 43%, #dceaff 50%, transparent 57%);
+  opacity: 0.7;
+}
+@keyframes vivid-glimmer {
+  0%,
+  15%,
+  100% {
+    opacity: 0.08;
+    transform: scale(0.35);
+  }
+  42% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+  58% {
+    opacity: 1;
+    transform: scale(1.6);
+  }
+  75% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+}
+.collection-app::after {
+  animation: starlight 4s ease-in-out infinite alternate;
+}
+@media (max-width: 1100px) {
+  .collection-app .controls {
+    flex-wrap: wrap;
+    gap: 12px 18px;
+  }
+  .collection-app .controls > .search {
+    flex: 1;
+    min-width: 210px;
+  }
+  .collection-app .utility-controls {
+    margin-left: auto;
+  }
+}
+@media (max-width: 600px) {
+  .collection-app .controls {
+    gap: 12px;
+  }
+  .collection-app .controls > .segments:first-child {
+    flex-basis: 100%;
+  }
+  .collection-app .controls > .segments:first-child button {
+    flex: 1;
+    padding: 0 12px;
+    min-height: 48px;
+    font-size: 15px;
+  }
+  .collection-app .controls > .search {
+    min-width: 150px;
+    height: 48px;
+  }
+  .collection-app .search input {
+    font-size: 15px;
+  }
+  .collection-app .utility-controls {
+    width: auto;
+    margin-left: 0;
+    gap: 12px;
+  }
+  .collection-app .friend-filter summary {
+    min-height: 48px;
+    font-size: 15px;
+  }
+  .collection-app .text-control {
+    min-height: 48px;
+    font-size: 0;
+  }
+  .collection-app .friend-filter fieldset {
+    top: 52px;
+  }
+}
+@media (max-width: 360px) {
+  .collection-app .controls > .segments:first-child button {
+    font-size: 14px;
+    padding: 0 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .collection-app::after {
+    animation: none;
+  }
+}

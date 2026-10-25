@@ -1,104 +1,111 @@
-.welcome-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  padding: 2rem;
-  background-color: #121212;
+.sign-in-app .sign-in-main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 30px 24px 70px;
 }
-
-.welcome-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.sign-in-panel {
+  width: min(100%, 350px);
   text-align: center;
-  flex-grow: 1;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 2rem;
 }
-
-.welcome-content h1 {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  text-transform: none;
-  letter-spacing: 2px;
+.sign-in-panel h1 {
+  color: #eff2f7;
+  font-size: 25px;
+  font-weight: 500;
+  letter-spacing: -0.6px;
+  margin-top: 29px;
 }
-
-.welcome-content p {
-  font-size: 1.25rem;
-  margin-bottom: 3rem;
-  color: #a8a8a8;
+.sign-in-panel > p {
+  color: #a6afbf;
+  font-size: 13px;
+  line-height: 1.7;
+  margin-top: 10px;
 }
-
-.spotify-login-button {
-  background-color: #333;
+.collection-app .sign-in-button {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  border: none;
-  border-radius: 30px;
-  padding: 14px 35px;
-  font-size: 1.2rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-bottom: 2rem;
+  width: 100%;
+  min-height: 54px;
+  margin-top: 25px;
+  gap: 11px;
+  font-size: 14px;
+  border-radius: 9px;
 }
-
-.spotify-logout-button {
-    background-color: #333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    border: none;
-    border-radius: 30px;
-    padding: 14px 35px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-  }
-  
-
-.spotify-login-button:hover {
-  transform: scale(1.05);
+.sign-in-button > span {
+  margin-left: auto;
 }
-
-.spotify-login-button:active {
-  transform: scale(0.98);
-}
-
-.spotify-icon {
-  width: 24px;
-  height: 24px;
-  margin-right: 10px;
-}
-
-.creator-info {
-  display: flex;
-  align-items: center;
-  margin-top: 3rem;
-  font-size: 0.9rem;
-  color: #a8a8a8;
-}
-
-.creator-text {
-  margin-right: 8px;
-}
-
-.creator-logo {
+.sign-in-button svg {
   width: 20px;
   height: 20px;
 }
-
-@media (max-width: 768px) {
-  .welcome-content h1 {
-    font-size: 3rem;
+.sign-in-panel > .sign-in-error {
+  color: #f1b5b0;
+  font-size: 12px;
+}
+.sign-in-ipod {
+  display: block;
+  width: 91px;
+  height: 146px;
+  border-radius: 12px;
+  margin: 0 auto;
+  position: relative;
+  background: linear-gradient(115deg, #fffef6, #e2e7d8);
+  border: 1px solid #ffffffa0;
+  box-shadow:
+    inset 1px 1px #fff,
+    inset -2px -2px 4px #626e5d30,
+    0 0 65px #a6d7870b;
+  transform: rotate(-6deg);
+}
+.sign-in-ipod > span {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 12px;
+  height: 52px;
+  padding: 6px 4px;
+  border-radius: 3px;
+  border: 2px solid #929c82;
+  background: #cad4b6;
+  color: #354431;
+  font:
+    bold 8px 'Courier New',
+    monospace;
+  text-align: left;
+}
+.sign-in-ipod i {
+  display: block;
+  margin-top: 7px;
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 400;
+  border-top: 1px solid #8d9b7c;
+  padding-top: 5px;
+}
+.sign-in-ipod > b {
+  position: absolute;
+  width: 47px;
+  height: 47px;
+  left: 21px;
+  bottom: 17px;
+  border-radius: 50%;
+  background: #e3e8da;
+  border: 1px solid #c4cdbb;
+  box-shadow: inset 0 1px #fff8;
+}
+.sign-in-ipod > b::after {
+  content: '';
+  position: absolute;
+  inset: 13px;
+  border: 1px solid #bdc8b2;
+  border-radius: 50%;
+  background: #f3f5ed;
+}
+@media (max-width: 600px) {
+  .sign-in-app .site-header {
+    height: 90px;
+    min-height: 90px;
   }
-  
-  .welcome-content p {
-    font-size: 1.1rem;
+  .sign-in-app .sign-in-main {
+    padding-bottom: 60px;
   }
 }

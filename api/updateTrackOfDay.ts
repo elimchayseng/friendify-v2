@@ -15,8 +15,6 @@ export async function refreshSpotifyToken(refreshToken: string) {
         if (!refreshToken) {
             throw new Error('Missing refresh token')
         }
-        console.log('Refreshing token with refresh token:', refreshToken)
-        console.log('ClientID', clientId)
 
         const params = new URLSearchParams()
       params.append("client_id", clientId)
@@ -96,14 +94,19 @@ function isTokenExpired(expiresAt: string | null): boolean {
 export async function GET(req: Request) {
 //   Verify the secret token from Vercel
   const authorization = req.headers.get('authorization')
+  if (!cronSecret) {
+    console.error('Cron authentication is not configured')
+    return new Response(JSON.stringify({ message: 'Service unavailable' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
   if (authorization !== `Bearer ${cronSecret}`) {
-    console.log('Auth failed. Expected:', cronSecret, 'Got:', authorization)
     return new Response(JSON.stringify({ message: 'Unauthorized' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' }
     })
       }
-    console.log(req)
 
   try {
     // Part 1: Update all users' top tracks
