@@ -5,6 +5,7 @@ import type { Session } from '@supabase/supabase-js'
 import AppContent from './components/AppContent'
 import WelcomePage from './components/WelcomePage'
 import { supabase, saveUserTracks, isSupabaseConfigured } from './lib/supabase'
+import { saveSpotifyProfile } from './lib/spotify-profile'
 import './App.css'
 
 const queryClient = new QueryClient({
@@ -125,22 +126,16 @@ function App() {
       }
 
       // Always upsert user to ensure we have current tokens
-      const { data: dbUser, error: upsertError } = await supabase
-        .from('users')
-        .upsert(
-          {
-            spotify_id: spotifyId,
-            username,
-            access_token: accessToken,
-            refresh_token: session.provider_refresh_token,
-            token_expires_at: expiresAt,
-          },
-          {
-            onConflict: 'spotify_id',
-          }
-        )
-        .select()
-        .single()
+      const { data: dbUser, error: upsertError } = await saveSpotifyProfile(
+        supabase,
+        {
+          spotify_id: spotifyId,
+          username,
+          access_token: accessToken,
+          refresh_token: session.provider_refresh_token,
+          token_expires_at: expiresAt,
+        }
+      )
 
       if (upsertError || !dbUser) {
         console.error('Failed to upsert user in database', upsertError)
